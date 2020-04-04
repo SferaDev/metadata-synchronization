@@ -6,6 +6,7 @@ import ReactDOM from "react-dom";
 import { AuthBoundary, AuthConfig } from "./components/auth/AuthBoundary";
 import "./locales";
 import App from "./pages/app/App";
+import i18n from "./locales";
 
 const apiVersion = "30";
 
@@ -24,7 +25,7 @@ async function main() {
         const config = await buildConfig();
 
         ReactDOM.render(
-            <AuthBoundary config={config}>
+            <AuthBoundary config={config} appName={i18n.t("MetaData Synchronization")}>
                 <Provider config={config}>
                     <App />
                 </Provider>

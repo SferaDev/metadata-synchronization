@@ -35,9 +35,10 @@ export interface AuthConfig {
 
 export interface AuthBoundaryProps {
     config: AuthConfig;
+    appName?: string;
 }
 
-export const AuthBoundary: React.FC<AuthBoundaryProps> = ({ children, config }) => {
+export const AuthBoundary: React.FC<AuthBoundaryProps> = ({ children, config, appName }) => {
     const { baseUrl, production } = config;
     const [api, setApi] = useState<D2Api>();
     const [d2, setD2] = useState<any>();
@@ -69,7 +70,13 @@ export const AuthBoundary: React.FC<AuthBoundaryProps> = ({ children, config }) 
         return <ApiContext.Provider value={{ d2, api }}>{children}</ApiContext.Provider>;
     } else if (!production) {
         return (
-            <LoginPage loginAction={loginAction} loading={loading} error={error} server={baseUrl} />
+            <LoginPage
+                title={appName}
+                loginAction={loginAction}
+                loading={loading}
+                error={error}
+                server={baseUrl}
+            />
         );
     } else {
         return null;
