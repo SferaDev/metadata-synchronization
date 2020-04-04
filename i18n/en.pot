@@ -5,13 +5,25 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-03-31T05:09:52.458Z\n"
-"PO-Revision-Date: 2020-03-31T05:09:52.458Z\n"
+"POT-Creation-Date: 2020-04-04T12:22:05.565Z\n"
+"PO-Revision-Date: 2020-04-04T12:22:05.565Z\n"
 
-msgid "Unauthorized - You do not have permission to view this page."
+msgid "Welcome"
+msgstr ""
+
+msgid "Server"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Password"
 msgstr ""
 
 msgid "Login"
+msgstr ""
+
+msgid "Unauthorized - You do not have permission to view this page."
 msgstr ""
 
 msgid "Identifier"
@@ -849,12 +861,6 @@ msgid "URL endpoint"
 msgstr ""
 
 msgid "Field should be an url"
-msgstr ""
-
-msgid "Username"
-msgstr ""
-
-msgid "Password"
 msgstr ""
 
 msgid "Please fix the issues before testing the connection"
