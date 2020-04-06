@@ -3,10 +3,11 @@ import { Provider } from "@dhis2/app-runtime";
 import axios from "axios";
 import React from "react";
 import ReactDOM from "react-dom";
-import { AuthBoundary, AuthConfig } from "./components/auth/AuthBoundary";
+import { AuthBoundary, AuthConfig } from "./components/boundaries/AuthBoundary";
 import "./locales";
 import App from "./pages/app/App";
 import i18n from "./locales";
+import { ErrorBoundary } from "./components/boundaries/ErrorBoundary";
 
 const apiVersion = "30";
 
@@ -21,21 +22,18 @@ async function buildConfig(): Promise<AuthConfig> {
 }
 
 async function main() {
-    try {
-        const config = await buildConfig();
+    const config = await buildConfig();
 
-        ReactDOM.render(
-            <AuthBoundary config={config} appName={i18n.t("MetaData Synchronization")}>
+    ReactDOM.render(
+        <AuthBoundary config={config} appName={i18n.t("MetaData Synchronization")}>
+            <ErrorBoundary>
                 <Provider config={config}>
                     <App />
                 </Provider>
-            </AuthBoundary>,
-            document.getElementById("root")
-        );
-    } catch (err) {
-        console.error(err);
-        ReactDOM.render(<div>{err.toString()}</div>, document.getElementById("root"));
-    }
+            </ErrorBoundary>{" "}
+        </AuthBoundary>,
+        document.getElementById("root")
+    );
 }
 
 main();

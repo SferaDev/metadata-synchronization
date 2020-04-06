@@ -5,8 +5,32 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-04-04T12:22:05.565Z\n"
-"PO-Revision-Date: 2020-04-04T12:22:05.565Z\n"
+"POT-Creation-Date: 2020-04-06T05:09:13.572Z\n"
+"PO-Revision-Date: 2020-04-06T05:09:13.572Z\n"
+
+msgid "Unauthorized - You do not have permission to view this page."
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Browser"
+msgstr ""
+
+msgid "URL"
+msgstr ""
+
+msgid "An unexpected error happened in the application"
+msgstr ""
+
+msgid "Reload"
+msgstr ""
+
+msgid "Send feedback"
+msgstr ""
 
 msgid "Welcome"
 msgstr ""
@@ -14,16 +38,7 @@ msgstr ""
 msgid "Server"
 msgstr ""
 
-msgid "Username"
-msgstr ""
-
 msgid "Password"
-msgstr ""
-
-msgid "Login"
-msgstr ""
-
-msgid "Unauthorized - You do not have permission to view this page."
 msgstr ""
 
 msgid "Identifier"
@@ -682,6 +697,9 @@ msgstr ""
 msgid "Use default configuration"
 msgstr ""
 
+msgid "MetaData Synchronization"
+msgstr ""
+
 msgid "Preparing synchronization"
 msgstr ""
 
@@ -707,9 +725,6 @@ msgid "Error {{status}}"
 msgstr ""
 
 msgid "Network error {{error}}, check if server is up and CORS is enabled"
-msgstr ""
-
-msgid "MetaData Synchronization"
 msgstr ""
 
 msgid "Metadata Synchronization History"
