@@ -1,4 +1,4 @@
-import { LinearProgress } from "@material-ui/core";
+import { LinearProgress, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { useSnackbar } from "d2-ui-components";
 import { ConfirmationDialog } from "d2-ui-components/confirmation-dialog/ConfirmationDialog";
@@ -9,11 +9,12 @@ import { Instance } from "../../../../domain/instance/entities/Instance";
 import {
     MetadataPackageDiff,
     ModelDiff,
+    ObjUpdate,
 } from "../../../../domain/packages/entities/MetadataPackageDiff";
 import i18n from "../../../../locales";
 import { useAppContext } from "../../../common/contexts/AppContext";
 import SyncSummary from "../sync-summary/SyncSummary";
-import { getChange, getTitle, usePackageImporter } from "./utils";
+import { getShortChange, getTitle, usePackageImporter } from "./utils";
 
 export interface PackagesDiffDialogProps {
     onClose(): void;
@@ -128,14 +129,39 @@ export const ModelDiffList: React.FC<{ modelDiff: ModelDiff }> = props => {
 
                     <List
                         items={diff.updates.map(update => (
-                            <React.Fragment key={update.obj.id}>
-                                [{update.obj.id}] {update.obj.name}
-                                <List items={update.fieldsUpdated.map(getChange)} />
-                            </React.Fragment>
+                            <ObjectInfo
+                                key={update.obj.id}
+                                update={update}
+                                onViewMore={console.log}
+                            />
                         ))}
                     />
                 </li>
             )}
+        </React.Fragment>
+    );
+};
+
+interface ObjectInfoProps {
+    update: ObjUpdate;
+    onViewMore: (object: ObjUpdate) => void;
+}
+
+export const ObjectInfo: React.FC<ObjectInfoProps> = props => {
+    const { update, onViewMore } = props;
+    const showFullInfo = React.useCallback(() => {
+        onViewMore(update);
+    }, [onViewMore, update]);
+    const { obj: object } = update;
+
+    const items = update.fieldsUpdated.map(getShortChange);
+    const isAnyTruncated = _(items).some(item => item.isTruncated);
+
+    return (
+        <React.Fragment>
+            [{object.id}] {object.name}
+            {isAnyTruncated && <Button onClick={showFullInfo}>{i18n.t("View more")}</Button>}
+            <List items={items.map(item => item.message)} />
         </React.Fragment>
     );
 };

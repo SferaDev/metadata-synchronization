@@ -10,8 +10,12 @@ import i18n from "../../../../locales";
 import SyncReport from "../../../../models/syncReport";
 import { useAppContext } from "../../../common/contexts/AppContext";
 
-export function getChange(u: FieldUpdate): string {
-    return `${u.field}: ${truncate(u.oldValue)} -> ${truncate(u.newValue)}`;
+export function getShortChange(u: FieldUpdate): { isTruncated: boolean; message: string } {
+    const oldValueT = truncate(u.oldValue);
+    const newValueT = truncate(u.newValue);
+    const isTruncated = u.oldValue !== oldValueT || u.newValue !== newValueT;
+    const message = `${u.field}: ${oldValueT} -> ${u.newValue}`;
+    return { isTruncated, message };
 }
 
 function truncate(s: string) {
