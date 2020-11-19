@@ -15,7 +15,7 @@ import { useViewSelector, ViewSelectorConfig } from "./useViewSelector";
 import { Store } from "../../../../domain/packages/entities/Store";
 
 export interface ModulePackageListTableProps {
-    onCreate?(): void;
+    onCreate?(action?: string): void;
     onViewChange?(option: ViewOption): void;
     viewValue?: ViewOption;
     presentation: PresentationOption;

@@ -30,6 +30,7 @@ import SyncReport from "../../../../models/syncReport";
 import { isAppConfigurator, isGlobalAdmin } from "../../../../utils/permissions";
 import { ModulePackageListPageProps } from "../../../webapp/pages/module-package-list/ModulePackageListPage";
 import { useAppContext } from "../../contexts/AppContext";
+import { ActionButton, ActionOption } from "../action-button/ActionButton";
 import Dropdown from "../dropdown/Dropdown";
 import PackageImportDialog from "../package-import-dialog/PackageImportDialog";
 import { PackagesDiffDialog, DiffPackages } from "../packages-diff-dialog/PackagesDiffDialog";
@@ -54,7 +55,6 @@ export const PackagesListTable: React.FC<PackagesListTableProps> = ({
     isImportDialog = false,
     onSelectionChange,
     selectedIds,
-    actionButtonLabel,
 }) => {
     const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
@@ -706,6 +706,25 @@ export const PackagesListTable: React.FC<PackagesListTableProps> = ({
         isGlobalAdmin(api).then(setGlobalAdmin);
     }, [api]);
 
+    const handleMainActionClick = useCallback(
+        (action: string) => {
+            if (onActionButtonClick) onActionButtonClick(action);
+        },
+        [onActionButtonClick]
+    );
+
+    const mainActions: ActionOption[] = useMemo(
+        () => [
+            { icon: <Icon>add</Icon>, name: "add", text: i18n.t("Add Package from File") },
+            {
+                icon: <Icon>arrow_downward</Icon>,
+                name: "importPackage",
+                text: i18n.t("Import packages (wizard)"),
+            },
+        ],
+        []
+    );
+
     return (
         <React.Fragment>
             <ObjectsTable<TableListPackage>
@@ -714,15 +733,17 @@ export const PackagesListTable: React.FC<PackagesListTableProps> = ({
                 columns={columns}
                 details={details}
                 actions={actions}
-                onActionButtonClick={showImportFromWizardButton ? onActionButtonClick : undefined}
                 forceSelectionColumn={presentation === "app"}
                 filterComponents={filterComponents}
                 selection={selection}
                 onChange={updateTable}
                 paginationOptions={paginationOptions}
-                actionButtonLabel={actionButtonLabel}
                 loading={loadingTable}
             />
+
+            {showImportFromWizardButton && (
+                <ActionButton onClick={handleMainActionClick} actions={mainActions} />
+            )}
 
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 

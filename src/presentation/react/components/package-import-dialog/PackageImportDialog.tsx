@@ -19,7 +19,7 @@ import { PackageImportWizard } from "../package-import-wizard/PackageImportWizar
 
 interface PackageImportDialogProps {
     isOpen: boolean;
-    instance: PackageSource;
+    instance?: PackageSource;
     selectedPackagesId?: string[];
     onClose: () => void;
     openSyncSummary?: (result: SyncReport) => void;
@@ -73,7 +73,7 @@ const PackageImportDialog: React.FC<PackageImportDialogProps> = ({
     };
 
     const getPackage = (packageId: string): Promise<Either<"NOT_FOUND", Package>> => {
-        if (isInstance(packageImportRule.source)) {
+        if (!packageImportRule.source || isInstance(packageImportRule.source)) {
             return compositionRoot.packages.get(packageId, packageImportRule.source);
         } else {
             return compositionRoot.packages.getStore(packageImportRule.source.id, packageId);
@@ -112,19 +112,25 @@ const PackageImportDialog: React.FC<PackageImportDialogProps> = ({
                             i18n.t("Importing package {{name}}", { name: originPackage.name })
                         );
 
-                        if (isStore(packageImportRule.source)) {
+                        if (packageImportRule.source && isStore(packageImportRule.source)) {
                             storePackageUrls[originPackage.id] = packageId;
                         }
 
                         const mapping = await compositionRoot.mapping.get({
-                            type: isInstance(packageImportRule.source) ? "instance" : "store",
-                            id: packageImportRule.source.id,
+                            type:
+                                !packageImportRule.source || isInstance(packageImportRule.source)
+                                    ? "instance"
+                                    : "store",
+                            id: packageImportRule.source?.id ?? "LOCAL",
                             moduleId: originPackage.module.id,
                         });
 
-                        const originInstance = isInstance(packageImportRule.source)
-                            ? await compositionRoot.instances.getById(packageImportRule.source.id)
-                            : undefined;
+                        const originInstance =
+                            !packageImportRule.source || isInstance(packageImportRule.source)
+                                ? await compositionRoot.instances.getById(
+                                      packageImportRule.source?.id ?? "LOCAL"
+                                  )
+                                : undefined;
 
                         const originDataSource =
                             originInstance?.value.data ??

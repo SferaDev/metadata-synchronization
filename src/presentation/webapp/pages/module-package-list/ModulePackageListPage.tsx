@@ -1,4 +1,3 @@
-import { Icon } from "@material-ui/core";
 import { PaginationOptions } from "d2-ui-components";
 import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -19,7 +18,7 @@ import SyncSummary from "../../../react/components/sync-summary/SyncSummary";
 export interface ModulePackageListPageProps {
     remoteInstance?: Instance;
     remoteStore?: Store;
-    onActionButtonClick?: (event: React.MouseEvent<unknown, MouseEvent>) => void;
+    onActionButtonClick?: (action?: string) => void;
     presentation: PresentationOption;
     externalComponents?: ReactNode;
     pageSizeOptions?: number[];
@@ -43,17 +42,21 @@ export const ModulePackageListPage: React.FC = () => {
         history.push("/");
     }, [history]);
 
-    const create = useCallback(() => {
-        if (tableOption === "modules") {
-            history.push(`/modules/new`);
-        } else {
-            if (!selectedInstance) {
-                setAddPackageDialogOpen(true);
+    const create = useCallback(
+        (action?: string) => {
+            if (tableOption === "modules") {
+                history.push(`/modules/new`);
             } else {
-                setOpenImportPackageDialog(true);
+                debugger;
+                if (action === "add") {
+                    setAddPackageDialogOpen(true);
+                } else {
+                    setOpenImportPackageDialog(true);
+                }
             }
-        }
-    }, [history, tableOption, selectedInstance]);
+        },
+        [history, tableOption]
+    );
 
     const setTableOption = useCallback(
         (option: ViewOption) => {
@@ -100,20 +103,13 @@ export const ModulePackageListPage: React.FC = () => {
                 presentation={"app"}
                 openSyncSummary={setSyncReport}
                 onInstanceChange={setSelectedInstance}
-                actionButtonLabel={
-                    tableOption === "modules" ? undefined : !selectedInstance ? (
-                        <Icon>add</Icon>
-                    ) : (
-                        <Icon>arrow_downward</Icon>
-                    )
-                }
             />
 
             {!!syncReport && (
                 <SyncSummary response={syncReport} onClose={() => setSyncReport(undefined)} />
             )}
 
-            {selectedInstance && (
+            {openImportPackageDialog && (
                 <PackageImportDialog
                     isOpen={openImportPackageDialog}
                     onClose={() => setOpenImportPackageDialog(false)}

@@ -6,7 +6,7 @@ import { DataSourceMapping } from "../entities/DataSourceMapping";
 import { isMappingOwnerStore, MappingOwner } from "../entities/MappingOwner";
 
 export class GetMappingByOwnerUseCase implements UseCase {
-    constructor(private storageRepository: StorageRepository) {}
+    constructor(private storageRepository: StorageRepository, private localInstance: Instance,) { }
 
     public async execute(owner: MappingOwner): Promise<DataSourceMapping | undefined> {
         if (isMappingOwnerStore(owner)) {
@@ -33,16 +33,18 @@ export class GetMappingByOwnerUseCase implements UseCase {
                 return undefined;
             }
         } else {
-            const instance = await this.storageRepository.getObjectInCollection<Instance>(
-                Namespace.INSTANCES,
-                owner.id
-            );
+            const instance = (owner.id === "LOCAL") ?
+                this.localInstance :
+                await this.storageRepository.getObjectInCollection<Instance>(
+                    Namespace.INSTANCES,
+                    owner.id
+                );
 
             return instance
                 ? DataSourceMapping.build({
-                      owner: { type: "instance", id: instance.id },
-                      mappingDictionary: instance.metadataMapping ?? {},
-                  })
+                    owner: { type: "instance", id: instance.id },
+                    mappingDictionary: instance.metadataMapping ?? {},
+                })
                 : undefined;
         }
     }

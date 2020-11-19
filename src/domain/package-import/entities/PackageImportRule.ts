@@ -2,12 +2,12 @@ import { ModelValidation, validateModel, ValidationError } from "../../common/en
 import { PackageSource } from "./PackageSource";
 
 interface PackageImportRuleData {
-    source: PackageSource;
+    source?: PackageSource;
     packageIds: string[];
 }
 
 export class PackageImportRule {
-    public readonly source: PackageSource;
+    public readonly source?: PackageSource;
     public readonly packageIds: string[];
 
     constructor(private data: PackageImportRuleData) {
@@ -15,7 +15,7 @@ export class PackageImportRule {
         this.packageIds = data.packageIds;
     }
 
-    static create(source: PackageSource, selectedPackagesId?: string[]): PackageImportRule {
+    static create(source?: PackageSource, selectedPackagesId?: string[]): PackageImportRule {
         return new PackageImportRule({
             source,
             packageIds: selectedPackagesId || [],

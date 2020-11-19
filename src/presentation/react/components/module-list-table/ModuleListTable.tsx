@@ -510,7 +510,7 @@ export const ModulesListTable: React.FC<ModulePackageListPageProps> = ({
                 columns={columns}
                 details={details}
                 actions={actions}
-                onActionButtonClick={onActionButtonClick}
+                onActionButtonClick={() => onActionButtonClick}
                 forceSelectionColumn={presentation === "app"}
                 filterComponents={filterComponents}
                 selection={selection}
