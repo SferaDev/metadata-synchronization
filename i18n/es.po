@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-11-16T10:51:33.105Z\n"
+"POT-Creation-Date: 2020-11-19T08:31:54.467Z\n"
 "PO-Revision-Date: 2020-07-10T06:53:30.625Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -103,6 +103,10 @@ msgstr ""
 
 msgid "Program with Indicators"
 msgstr ""
+
+#, fuzzy
+msgid "Package actions"
+msgstr "Paquetes"
 
 msgid "Unauthorized - You do not have permission to view this page."
 msgstr ""
@@ -691,6 +695,12 @@ msgid "Dhis2 version"
 msgstr ""
 
 msgid "An error has ocurred retrieving imported packages"
+msgstr ""
+
+msgid "Add Package from File"
+msgstr ""
+
+msgid "Import packages (wizard)"
 msgstr ""
 
 msgid "Cannot get data from remote instance"
