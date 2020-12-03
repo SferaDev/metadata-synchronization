@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { CompositionRoot } from "../../CompositionRoot";
-import { D2Api } from "../../../types/d2-api";
+import { CompositionRoot } from "../../../CompositionRoot";
+import { D2Api } from "../../../../types/d2-api";
 
 export interface AppContext {
     api: D2Api;
