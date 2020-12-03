@@ -2,7 +2,7 @@ import _ from "lodash";
 import {
     cleanNestedMappedId,
     EXCLUDED_KEY,
-} from "../../../presentation/react/components/mapping-table/utils";
+} from "../../../presentation/react/core/components/mapping-table/utils";
 import { Dictionary } from "../../../types/utils";
 import { NamedRef } from "../../common/entities/Ref";
 import { RepositoryFactory } from "../../common/factories/RepositoryFactory";
@@ -12,7 +12,7 @@ import { MetadataPackage } from "../../metadata/entities/MetadataEntities";
 import { MetadataMapping, MetadataMappingDictionary } from "../entities/MetadataMapping";
 
 export abstract class GenericMappingUseCase {
-    constructor(private repositoryFactory: RepositoryFactory, protected localInstance: Instance) {}
+    constructor(private repositoryFactory: RepositoryFactory, protected localInstance: Instance) { }
 
     protected async getMetadata(instance: DataSource, ids: string[]) {
         return this.repositoryFactory
