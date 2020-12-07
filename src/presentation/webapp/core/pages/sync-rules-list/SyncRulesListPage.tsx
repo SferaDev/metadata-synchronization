@@ -46,6 +46,7 @@ import { SharingDialog } from "../../../../react/core/components/sharing-dialog/
 import SyncSummary from "../../../../react/core/components/sync-summary/SyncSummary";
 import { TestWrapper } from "../../../../react/core/components/test-wrapper/TestWrapper";
 import { useAppContext } from "../../../../react/core/contexts/AppContext";
+import { goPreviousToListPage } from "../../../Root";
 
 const config: {
     [key: string]: {
@@ -199,7 +200,7 @@ const SyncRulesPage: React.FC = () => {
     };
 
     const back = () => {
-        history.goBack();
+        goPreviousToListPage(history);
     };
 
     const confirmDelete = async () => {

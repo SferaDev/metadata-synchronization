@@ -16,6 +16,7 @@ import PackageImportDialog from "../../../../react/core/components/package-impor
 import PageHeader from "../../../../react/core/components/page-header/PageHeader";
 import SyncSummary from "../../../../react/core/components/sync-summary/SyncSummary";
 import { useAppContext } from "../../../../react/core/contexts/AppContext";
+import { goPreviousToListPage } from "../../../Root";
 
 export interface ModulePackageListPageProps {
     remoteInstance?: Instance;
@@ -51,7 +52,7 @@ export const ModulePackageListPage: React.FC = () => {
     }, [compositionRoot]);
 
     const backHome = useCallback(() => {
-        history.push("/");
+        goPreviousToListPage(history);
     }, [history]);
 
     const create = useCallback(() => {

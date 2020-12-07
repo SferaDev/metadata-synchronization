@@ -25,6 +25,7 @@ import { isAppConfigurator } from "../../../../../utils/permissions";
 import { useAppContext } from "../../../../react/core/contexts/AppContext";
 import PageHeader from "../../../../react/core/components/page-header/PageHeader";
 import { TestWrapper } from "../../../../react/core/components/test-wrapper/TestWrapper";
+import { goPreviousToListPage } from "../../../Root";
 
 const InstanceListPage = () => {
     const { api, compositionRoot } = useAppContext();
@@ -141,7 +142,7 @@ const InstanceListPage = () => {
     };
 
     const backHome = () => {
-        history.push("/");
+        goPreviousToListPage(history);
     };
 
     const updateTable = (state: TableState<Instance>) => {

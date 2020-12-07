@@ -23,6 +23,7 @@ import { useAppContext } from "../react/core/contexts/AppContext";
 import * as permissions from "../../utils/permissions";
 import HomePage from "./core/pages/home/HomePage";
 import { MSFHomePage } from "./msf-aggregate-data/pages/MSFHomePage";
+import * as H from "history";
 
 export type AppVariant =
     | "core-app"
@@ -30,8 +31,14 @@ export type AppVariant =
     | "module-package-app"
     | "msf-aggregate-data-app";
 
+const appVariant = process.env.REACT_APP_PRESENTATION_VARIANT as AppVariant;
+
+//TODO: Solve this when we create typed root
+export const goPreviousToListPage = (history: H.History) => {
+    appVariant === "msf-aggregate-data-app" ? history.push("/dashboard") : history.push("/");
+};
+
 const Root: React.FC = () => {
-    const appVariant = process.env.REACT_APP_PRESENTATION_VARIANT as AppVariant;
     const { api } = useAppContext();
 
     return (

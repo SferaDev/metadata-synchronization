@@ -13,6 +13,7 @@ import {
 import MetadataTable from "../../../../react/core/components/metadata-table/MetadataTable";
 import PageHeader from "../../../../react/core/components/page-header/PageHeader";
 import { useAppContext } from "../../../../react/core/contexts/AppContext";
+import { goPreviousToListPage } from "../../../Root";
 
 export const ResponsiblesListPage: React.FC = () => {
     const { compositionRoot, api } = useAppContext();
@@ -23,7 +24,7 @@ export const ResponsiblesListPage: React.FC = () => {
     const [appConfigurator, updateAppConfigurator] = useState(false);
 
     const backHome = useCallback(() => {
-        history.push("/");
+        goPreviousToListPage(history);
     }, [history]);
 
     const updateRemoteInstance = useCallback(

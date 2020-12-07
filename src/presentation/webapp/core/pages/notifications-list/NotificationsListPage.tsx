@@ -31,6 +31,7 @@ import { NotificationViewerDialog } from "../../../../react/core/components/noti
 import PageHeader from "../../../../react/core/components/page-header/PageHeader";
 import SyncSummary from "../../../../react/core/components/sync-summary/SyncSummary";
 import { useAppContext } from "../../../../react/core/contexts/AppContext";
+import { goPreviousToListPage } from "../../../Root";
 
 export const NotificationsListPage: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -48,7 +49,7 @@ export const NotificationsListPage: React.FC = () => {
     const [syncReport, setSyncReport] = useState<SynchronizationReport>();
 
     const backHome = useCallback(() => {
-        history.push("/");
+        goPreviousToListPage(history);
     }, [history]);
 
     const changeUnreadCheckbox = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
