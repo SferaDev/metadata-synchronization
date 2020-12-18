@@ -1,8 +1,8 @@
-import { D2Api } from "d2-api/2.30";
 import _ from "lodash";
 import { Namespace } from "../../../data/storage/Namespaces";
 import i18n from "../../../locales";
-import { SynchronizationBuilder } from "../entities/SynchronizationBuilder";
+import { D2Api } from "../../../types/d2-api";
+import { executeAnalytics } from "../../../utils/analytics";
 import { cache } from "../../../utils/cache";
 import { promiseMap } from "../../../utils/common";
 import { getD2APiFromInstance } from "../../../utils/d2-utils";
@@ -28,8 +28,8 @@ import {
     SynchronizationResult,
     SynchronizationStatus,
 } from "../../reports/entities/SynchronizationResult";
+import { SynchronizationBuilder } from "../entities/SynchronizationBuilder";
 import { SynchronizationType } from "../entities/SynchronizationType";
-import { executeAnalytics } from "../../../utils/analytics";
 
 export type SyncronizationClass =
     | typeof MetadataSyncUseCase
