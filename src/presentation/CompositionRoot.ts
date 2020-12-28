@@ -1,21 +1,29 @@
 import { AggregatedD2ApiRepository } from "../data/aggregated/AggregatedD2ApiRepository";
 import { ConfigAppRepository } from "../data/config/ConfigAppRepository";
+import { CustomDataD2ApiRepository } from "../data/custom-data/CustomDataD2ApiRepository";
 import { EventsD2ApiRepository } from "../data/events/EventsD2ApiRepository";
 import { FileD2Repository } from "../data/file/FileD2Repository";
 import { InstanceD2ApiRepository } from "../data/instance/InstanceD2ApiRepository";
 import { MetadataD2ApiRepository } from "../data/metadata/MetadataD2ApiRepository";
 import { MetadataJSONRepository } from "../data/metadata/MetadataJSONRepository";
+import { MigrationsAppRepository } from "../data/migrations/MigrationsAppRepository";
 import { GitHubOctokitRepository } from "../data/packages/GitHubOctokitRepository";
 import { ReportsD2ApiRepository } from "../data/reports/ReportsD2ApiRepository";
 import { RulesD2ApiRepository } from "../data/rules/RulesD2ApiRepository";
 import { DownloadWebRepository } from "../data/storage/DownloadWebRepository";
+import { StoreD2ApiRepository } from "../data/stores/StoreD2ApiRepository";
 import { SystemInfoD2ApiRepository } from "../data/system-info/SystemInfoD2ApiRepository";
 import { TransformationD2ApiRepository } from "../data/transformations/TransformationD2ApiRepository";
 import { AggregatedSyncUseCase } from "../domain/aggregated/usecases/AggregatedSyncUseCase";
+import { DeleteAggregatedUseCase } from "../domain/aggregated/usecases/DeleteAggregatedUseCase";
+import { ListAggregatedUseCase } from "../domain/aggregated/usecases/ListAggregatedUseCase";
 import { UseCase } from "../domain/common/entities/UseCase";
 import { Repositories, RepositoryFactory } from "../domain/common/factories/RepositoryFactory";
+import { StartApplicationUseCase } from "../domain/common/usecases/StartApplicationUseCase";
 import { GetStorageConfigUseCase } from "../domain/config/usecases/GetStorageConfigUseCase";
 import { SetStorageConfigUseCase } from "../domain/config/usecases/SetStorageConfigUseCase";
+import { GetCustomDataUseCase } from "../domain/custom-data/usecases/GetCustomDataUseCase";
+import { SaveCustomDataUseCase } from "../domain/custom-data/usecases/SaveCustomDataUseCase";
 import { EventsSyncUseCase } from "../domain/events/usecases/EventsSyncUseCase";
 import { ListEventsUseCase } from "../domain/events/usecases/ListEventsUseCase";
 import { Instance } from "../domain/instance/entities/Instance";
@@ -43,6 +51,9 @@ import { ListMetadataUseCase } from "../domain/metadata/usecases/ListMetadataUse
 import { ListResponsiblesUseCase } from "../domain/metadata/usecases/ListResponsiblesUseCase";
 import { MetadataSyncUseCase } from "../domain/metadata/usecases/MetadataSyncUseCase";
 import { SetResponsiblesUseCase } from "../domain/metadata/usecases/SetResponsiblesUseCase";
+import { GetMigrationVersionsUseCase } from "../domain/migrations/usecases/GetMigrationVersionsUseCase";
+import { HasPendingMigrationsUseCase } from "../domain/migrations/usecases/HasPendingMigrationsUseCase";
+import { RunMigrationsUseCase } from "../domain/migrations/usecases/RunMigrationsUseCase";
 import { DeleteModuleUseCase } from "../domain/modules/usecases/DeleteModuleUseCase";
 import { DownloadModuleSnapshotUseCase } from "../domain/modules/usecases/DownloadModuleSnapshotUseCase";
 import { GetModuleUseCase } from "../domain/modules/usecases/GetModuleUseCase";
@@ -94,6 +105,7 @@ export class CompositionRoot {
         this.repositoryFactory = new RepositoryFactory(encryptionKey);
         this.repositoryFactory.bind(Repositories.InstanceRepository, InstanceD2ApiRepository);
         this.repositoryFactory.bind(Repositories.ConfigRepository, ConfigAppRepository);
+        this.repositoryFactory.bind(Repositories.CustomDataRepository, CustomDataD2ApiRepository);
         this.repositoryFactory.bind(Repositories.DownloadRepository, DownloadWebRepository);
         this.repositoryFactory.bind(Repositories.GitHubRepository, GitHubOctokitRepository);
         this.repositoryFactory.bind(Repositories.AggregatedRepository, AggregatedD2ApiRepository);
@@ -102,7 +114,9 @@ export class CompositionRoot {
         this.repositoryFactory.bind(Repositories.FileRepository, FileD2Repository);
         this.repositoryFactory.bind(Repositories.ReportsRepository, ReportsD2ApiRepository);
         this.repositoryFactory.bind(Repositories.RulesRepository, RulesD2ApiRepository);
+        this.repositoryFactory.bind(Repositories.StoreRepository, StoreD2ApiRepository);
         this.repositoryFactory.bind(Repositories.SystemInfoRepository, SystemInfoD2ApiRepository);
+        this.repositoryFactory.bind(Repositories.MigrationsRepository, MigrationsAppRepository);
         this.repositoryFactory.bind(
             Repositories.MetadataRepository,
             MetadataJSONRepository,
@@ -112,6 +126,21 @@ export class CompositionRoot {
             Repositories.TransformationRepository,
             TransformationD2ApiRepository
         );
+    }
+
+    @cache()
+    public get app() {
+        return getExecute({
+            initialize: new StartApplicationUseCase(this.repositoryFactory, this.localInstance),
+        });
+    }
+
+    @cache()
+    public get aggregated() {
+        return getExecute({
+            list: new ListAggregatedUseCase(this.repositoryFactory),
+            delete: new DeleteAggregatedUseCase(this.repositoryFactory),
+        });
     }
 
     @cache()
@@ -166,6 +195,14 @@ export class CompositionRoot {
             list: new ListMetadataUseCase(this.repositoryFactory, this.localInstance),
             listAll: new ListAllMetadataUseCase(this.repositoryFactory, this.localInstance),
             import: new ImportMetadataUseCase(this.repositoryFactory, this.localInstance),
+        });
+    }
+
+    @cache()
+    public get customData() {
+        return getExecute({
+            get: new GetCustomDataUseCase(this.repositoryFactory, this.localInstance),
+            save: new SaveCustomDataUseCase(this.repositoryFactory, this.localInstance),
         });
     }
 
@@ -345,6 +382,18 @@ export class CompositionRoot {
         return getExecute({
             getStorage: new GetStorageConfigUseCase(this.repositoryFactory, this.localInstance),
             setStorage: new SetStorageConfigUseCase(this.repositoryFactory, this.localInstance),
+        });
+    }
+
+    @cache()
+    public get migrations() {
+        return getExecute({
+            run: new RunMigrationsUseCase(this.repositoryFactory, this.localInstance),
+            getVersions: new GetMigrationVersionsUseCase(
+                this.repositoryFactory,
+                this.localInstance
+            ),
+            hasPending: new HasPendingMigrationsUseCase(this.repositoryFactory, this.localInstance),
         });
     }
 }

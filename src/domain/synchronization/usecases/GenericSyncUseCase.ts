@@ -22,11 +22,11 @@ import {
     AggregatedDataStats,
     EventsDataStats,
     SynchronizationReport,
-    SynchronizationReportStatus,
+    SynchronizationReportStatus
 } from "../../reports/entities/SynchronizationReport";
 import {
     SynchronizationResult,
-    SynchronizationStatus,
+    SynchronizationStatus
 } from "../../reports/entities/SynchronizationResult";
 import { SynchronizationBuilder } from "../entities/SynchronizationBuilder";
 import { SynchronizationType } from "../entities/SynchronizationType";
@@ -52,8 +52,8 @@ export abstract class GenericSyncUseCase {
         this.api = getD2APiFromInstance(localInstance);
     }
 
-    public abstract async buildPayload(): Promise<SyncronizationPayload>;
-    public abstract async mapPayload(
+    public abstract buildPayload(): Promise<SyncronizationPayload>;
+    public abstract mapPayload(
         instance: Instance,
         payload: SyncronizationPayload
     ): Promise<SyncronizationPayload>;
@@ -61,8 +61,8 @@ export abstract class GenericSyncUseCase {
     // We start to use domain concepts:
     // for the moment old model instance and domain entity instance are going to live together for a while on sync classes.
     // Little by little through refactors the old instance model should disappear
-    public abstract async postPayload(instance: Instance): Promise<SynchronizationResult[]>;
-    public abstract async buildDataStats(): Promise<
+    public abstract postPayload(instance: Instance): Promise<SynchronizationResult[]>;
+    public abstract buildDataStats(): Promise<
         AggregatedDataStats[] | EventsDataStats[] | undefined
     >;
 

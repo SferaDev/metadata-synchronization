@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-12-15T08:29:18.609Z\n"
-"PO-Revision-Date: 2020-12-15T08:29:18.609Z\n"
+"POT-Creation-Date: 2020-12-24T10:46:07.699Z\n"
+"PO-Revision-Date: 2020-12-24T10:46:07.699Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -134,7 +134,7 @@ msgstr ""
 msgid "Generate package from File"
 msgstr ""
 
-msgid "Name (*)"
+msgid "Package/Module Name (*)"
 msgstr ""
 
 msgid "Department (*)"
@@ -238,6 +238,9 @@ msgid "Close"
 msgstr ""
 
 msgid "Could not connect with remote instance"
+msgstr ""
+
+msgid "Applying mapping..."
 msgstr ""
 
 msgid "Could not apply mapping, please try again."
@@ -354,6 +357,9 @@ msgstr ""
 msgid "Category Options"
 msgstr ""
 
+msgid "Category Option Combos"
+msgstr ""
+
 msgid "Options"
 msgstr ""
 
@@ -393,15 +399,18 @@ msgstr ""
 msgid "Search by "
 msgstr ""
 
+msgid ""
+"There has been an error. You can either retry or contact your administrator "
+"if you think there has been an un recoverable error"
+msgstr ""
+
 msgid "There are pending migrations"
 msgstr ""
 
 msgid "Migrations finished successfully, you may now continue to the app"
 msgstr ""
 
-msgid ""
-"There has been an error. You can either retry or contact your administrator "
-"if you think there has been an un recoverable error"
+msgid "Checking migrations"
 msgstr ""
 
 msgid "Migrate instance"
@@ -414,20 +423,20 @@ msgid "Continue to the App"
 msgstr ""
 
 msgid ""
-"The app needs to run all pending migrations (v{{instanceVersion}} -> "
-"v{{appVersion}}) in order to continue. This may take a long time, make sure "
-"the process is not interrupted."
+"The app needs to run pending migrations (from version {{instanceVersion}} "
+"to version {{appVersion}}) in order to continue. This may take a long time, "
+"make sure the process is not interrupted."
 msgstr ""
 
 msgid "Error"
 msgstr ""
 
-msgid "Continue to app anyway"
+msgid "Continue to the app anyway"
 msgstr ""
 
 msgid ""
-"The database version (v{{instanceVersion}}) is greater than the app version "
-"(v{{appVersion}}), we cannot continue. Please contact the administrator to "
+"The database version ({{instanceVersion}}) is greater than the app version "
+"({{appVersion}}), cannot continue. Please contact the administrator to "
 "update the app."
 msgstr ""
 
@@ -497,6 +506,9 @@ msgid "Package of {{name}}"
 msgstr ""
 
 msgid "Generate package from {{name}}"
+msgstr ""
+
+msgid "Name (*)"
 msgstr ""
 
 msgid "Module: {{module}}"
@@ -765,9 +777,6 @@ msgid "Start date"
 msgstr ""
 
 msgid "End date"
-msgstr ""
-
-msgid "Use sync rules periods"
 msgstr ""
 
 msgid "You need to provide a subject"
@@ -1198,6 +1207,15 @@ msgstr ""
 msgid "You do not have assigned any organisation unit"
 msgstr ""
 
+msgid "Use sync rules periods"
+msgstr ""
+
+msgid "Delete data values before sync"
+msgstr ""
+
+msgid "Check existing data values in previous periods"
+msgstr ""
+
 msgid "True"
 msgstr ""
 
@@ -1211,6 +1229,14 @@ msgid "MSF Settings"
 msgstr ""
 
 msgid "Run Analytics"
+msgstr ""
+
+msgid "Data Element Group *"
+msgstr ""
+
+msgid ""
+"* Data Element Group: used to check existing data values in the destination "
+"data elements"
 msgstr ""
 
 msgid "Metadata Synchronization History"
@@ -1778,16 +1804,33 @@ msgstr ""
 msgid "Go to History"
 msgstr ""
 
+msgid "MSF Validation"
+msgstr ""
+
+msgid "Do you want to proceed?"
+msgstr ""
+
 msgid "Starting Aggregate Data..."
 msgstr ""
 
 msgid "Run analytics is disabled, last analytics execution: {{lastExecution}}"
 msgstr ""
 
+msgid ""
+"Deleting previous data values is not possible because data element group is "
+"not defined, please contact with your administrator"
+msgstr ""
+
 msgid "Finished Aggregate Data"
 msgstr ""
 
+msgid "Checking data values in previous periods ...."
+msgstr ""
+
 msgid "Starting Sync Rule {{name}} ..."
+msgstr ""
+
+msgid "Summary of Sync Rule"
 msgstr ""
 
 msgid "Finished Sync Rule {{name}}"
@@ -1797,6 +1840,20 @@ msgid "Finished Sync Rule {{name}} with errors"
 msgstr ""
 
 msgid "never"
+msgstr ""
+
+msgid "Error retrieving instance {{name}} to delete previoud data values"
+msgstr ""
+
+msgid "Error creating period"
+msgstr ""
+
+msgid ""
+"Deleting previous data values in target instance {{name}} for period "
+"{{period}}..."
+msgstr ""
+
+msgid "Deleting previous data values for period {{period}} is not possible"
 msgstr ""
 
 msgid "Widget cannot be used until an administrator opens the application"
