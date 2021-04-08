@@ -4,7 +4,6 @@ import {
     D2CategoryOptionSchema,
     D2DataSetSchema,
     D2IndicatorSchema,
-    D2OptionSchema,
     D2ProgramIndicatorSchema,
     D2ProgramSchema,
     SelectedPick,
@@ -14,7 +13,6 @@ import {
     dataElementFields,
     dataSetFields,
     indicatorFields,
-    optionFields,
     programFieldsWithDataElements,
     programFieldsWithIndicators,
 } from "../../utils/d2";
@@ -29,11 +27,12 @@ import {
     DataSetModel,
     IndicatorModel,
     OptionModel,
-    OptionSetModel,
     OrganisationUnitModel,
     ProgramIndicatorModel,
     ProgramModel,
     ProgramStageModel,
+    RelationshipTypeModel,
+    TrackedEntityAttributeModel,
 } from "./metadata";
 
 export class CategoryOptionMappedModel extends CategoryOptionModel {
@@ -77,8 +76,13 @@ export class OrganisationUnitMappedModel extends OrganisationUnitModel {
     protected static mappingType = "organisationUnits";
 }
 
+export class ProgramStageMappedModel extends ProgramStageModel {
+    protected static mappingType = "programStages";
+}
+
 export class ProgramIndicatorMappedModel extends ProgramIndicatorModel {
     protected static mappingType = "aggregatedDataElements";
+    protected static modelFilters: any = { programType: undefined };
 
     protected static modelTransform = (
         objects: SelectedPick<D2ProgramIndicatorSchema, typeof indicatorFields>[]
@@ -87,10 +91,6 @@ export class ProgramIndicatorMappedModel extends ProgramIndicatorModel {
             return { ...rest, aggregateExportCategoryOptionCombo };
         });
     };
-}
-
-export class ProgramStageMappedModel extends ProgramStageModel {
-    protected static mappingType = "programStages";
 }
 
 export class AggregatedDataElementModel extends DataElementModel {
@@ -121,23 +121,41 @@ export class DataSetWithDataElementsModel extends DataSetModel {
 export class ProgramDataElementModel extends DataElementModel {
     protected static metadataType = "programDataElements";
     protected static mappingType = "programDataElements";
+    protected static parentMappingType = "eventPrograms";
     protected static groupFilterName = DataElementModel.groupFilterName;
     protected static fields = dataElementFields;
+    protected static isSelectable = false;
 
     protected static modelFilters = { domainType: { neq: "AGGREGATE" } };
+}
+
+export class TrackerProgramDataElementModel extends ProgramDataElementModel {
+    protected static parentMappingType = "trackerProgramStages";
+}
+
+export class TrackerProgramStageMappedModel extends ProgramStageModel {
+    protected static metadataType = "trackerProgramStages";
+    protected static mappingType = "trackerProgramStages";
+    protected static parentMappingType = "trackerPrograms";
 }
 
 export class EventProgramModel extends ProgramModel {
     protected static metadataType = "eventPrograms";
     protected static mappingType = "eventPrograms";
-    protected static modelFilters = { programType: { eq: "WITHOUT_REGISTRATION" } };
+    protected static modelFilters = { programType: "WITHOUT_REGISTRATION" };
+}
+
+export class TrackerProgramModel extends ProgramModel {
+    protected static metadataType = "trackerPrograms";
+    protected static mappingType = "trackerPrograms";
 }
 
 export class EventProgramWithDataElementsModel extends EventProgramModel {
     protected static metadataType = "eventProgramWithDataElements";
-    protected static modelName = i18n.t("Program with Data Elements");
+    protected static modelName = i18n.t("Event Program with Data Elements");
     protected static childrenKeys = ["dataElements"];
     protected static fields = programFieldsWithDataElements;
+    protected static modelFilters: any = { programType: "WITHOUT_REGISTRATION" };
 
     protected static modelTransform = (
         objects: SelectedPick<D2ProgramSchema, typeof programFieldsWithDataElements>[]
@@ -152,6 +170,7 @@ export class EventProgramWithDataElementsModel extends EventProgramModel {
                             .map(({ dataElement }) => ({
                                 ...dataElement,
                                 id: `${program.id}-${programStageId}-${dataElement.id}`,
+                                parentId: `${program.id}`,
                                 model: ProgramDataElementModel,
                                 displayName:
                                     program.programStages.length > 1
@@ -164,11 +183,69 @@ export class EventProgramWithDataElementsModel extends EventProgramModel {
     };
 }
 
+export class EventProgramWithProgramStagesModel extends TrackerProgramModel {
+    protected static metadataType = "programWithProgramStages";
+    protected static modelName = i18n.t("Tracker Program with Program Stages");
+    protected static fields = programFieldsWithDataElements;
+    protected static modelFilters: any = { programType: "WITH_REGISTRATION" };
+    protected static childrenKeys = ["stages", "dataElements"];
+
+    protected static modelTransform = (
+        objects: SelectedPick<D2ProgramSchema, typeof programFieldsWithDataElements>[]
+    ) => {
+        return objects.map(program => ({
+            ...program,
+            stages: program.programStages.map(programStage => ({
+                ...programStage,
+                model: TrackerProgramStageMappedModel,
+                dataElements: programStage.programStageDataElements
+                    .filter(({ dataElement }) => !!dataElement)
+                    .map(({ dataElement }) => ({
+                        ...dataElement,
+                        id: `${program.id}-${programStage.id}-${dataElement.id}`,
+                        model: TrackerProgramDataElementModel,
+                    })),
+            })),
+        }));
+    };
+}
+
+export class EventProgramWithProgramStagesMappedModel extends TrackerProgramModel {
+    protected static metadataType = "programWithProgramStages";
+    protected static modelName = i18n.t("Tracker Program with Program Stages");
+    protected static fields = programFieldsWithDataElements;
+    protected static modelFilters: any = { programType: "WITH_REGISTRATION" };
+    protected static childrenKeys = ["programStages", "dataElements"];
+
+    protected static modelTransform = (
+        objects: SelectedPick<D2ProgramSchema, typeof programFieldsWithDataElements>[]
+    ) => {
+        return objects.map(program => ({
+            ...program,
+            programStages: program.programStages.map(programStage => ({
+                ...programStage,
+                id: `${program.id}-${programStage.id}`,
+                parentId: `${program.id}`,
+                model: TrackerProgramStageMappedModel,
+                dataElements: programStage.programStageDataElements
+                    .filter(({ dataElement }) => !!dataElement)
+                    .map(({ dataElement }) => ({
+                        ...dataElement,
+                        id: `${program.id}-${programStage.id}-${dataElement.id}`,
+                        parentId: `${program.id}-${programStage.id}`,
+                        model: TrackerProgramDataElementModel,
+                    })),
+            })),
+        }));
+    };
+}
+
 export class EventProgramWithIndicatorsModel extends EventProgramModel {
     protected static metadataType = "eventProgramWithIndicators";
     protected static modelName = i18n.t("Program with Indicators");
     protected static childrenKeys = ["programIndicators"];
     protected static fields = programFieldsWithIndicators;
+    protected static modelFilters: any = { programType: undefined };
 
     protected static modelTransform = (
         objects: SelectedPick<D2ProgramSchema, typeof programFieldsWithIndicators>[]
@@ -186,31 +263,29 @@ export class EventProgramWithIndicatorsModel extends EventProgramModel {
     };
 }
 
+export class DataElementFromTEIMappedModel extends DataElementModel {
+    protected static metadataType = "trackedEntityAttributesToDE";
+}
+
+export class TrackedEntityAttributeToTEIMappedModel extends TrackedEntityAttributeModel {
+    protected static modelName = i18n.t("Tracked Entity Attribute (to TEI)");
+    protected static metadataType = "trackedEntityAttributesToTEI";
+    protected static mappingType = "trackedEntityAttributesToTEI";
+}
+
+export class TrackedEntityAttributeToDEMappedModel extends TrackedEntityAttributeModel {
+    protected static modelName = i18n.t("Tracked Entity Attribute (to DE)");
+    protected static metadataType = "trackedEntityAttributesToDE";
+    protected static mappingType = "trackedEntityAttributesToDE";
+}
+
+export class RelationshipTypeMappedModel extends RelationshipTypeModel {
+    protected static mappingType = "relationshipTypes";
+}
+
 export class GlobalCategoryOptionModel extends CategoryOptionModel {
-    protected static fields = categoryOptionFields;
-    protected static childrenKeys = ["categoryOptions"];
     protected static mappingType = "categoryOptions";
     protected static isGlobalMapping = true;
-
-    protected static modelTransform = (
-        objects: SelectedPick<D2CategoryOptionSchema, typeof categoryOptionFields>[]
-    ) => {
-        return _(objects)
-            .map(({ categories }) => categories)
-            .flatten()
-            .uniqBy("id")
-            .map(category => ({
-                ...category,
-                model: CategoryModel,
-                categoryOptions: objects
-                    .filter(({ categories }) => _.find(categories, { id: category.id }))
-                    .map(option => ({
-                        ...option,
-                        model: GlobalCategoryOptionModel,
-                    })),
-            }))
-            .value();
-    };
 }
 
 export class GlobalCategoryComboModel extends CategoryComboModel {
@@ -234,28 +309,8 @@ export class GlobalCategoryModel extends CategoryModel {
 }
 
 export class GlobalOptionModel extends OptionModel {
-    protected static fields = optionFields;
-    protected static childrenKeys = ["options"];
     protected static mappingType = "options";
     protected static isGlobalMapping = true;
-
-    protected static modelTransform = (
-        objects: SelectedPick<D2OptionSchema, typeof optionFields>[]
-    ) => {
-        const childrenRows = _.groupBy(objects, "optionSet.id");
-
-        return _.uniqBy(
-            objects.map(({ optionSet }) => optionSet),
-            "id"
-        ).map(optionSet => ({
-            ...optionSet,
-            model: OptionSetModel,
-            options: childrenRows[optionSet.id].map(option => ({
-                ...option,
-                model: GlobalOptionModel,
-            })),
-        }));
-    };
 }
 
 export class GlobalDataElementModel extends ProgramDataElementModel {

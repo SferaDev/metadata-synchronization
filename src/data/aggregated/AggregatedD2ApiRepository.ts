@@ -1,6 +1,5 @@
 import _ from "lodash";
-import moment from "moment";
-import { Moment } from "moment";
+import moment, { Moment } from "moment";
 import { AggregatedPackage } from "../../domain/aggregated/entities/AggregatedPackage";
 import { DataValue } from "../../domain/aggregated/entities/DataValue";
 import { MappedCategoryOption } from "../../domain/aggregated/entities/MappedCategoryOption";
@@ -46,8 +45,8 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
             : undefined;
 
         try {
-            const { dataValues = [] } = await this.api
-                .get<AggregatedPackage>("/dataValueSets", {
+            const { dataValues = [] } = await this.api.dataValues
+                .getSet({
                     dataElementIdScheme: "UID",
                     orgUnitIdScheme: "UID",
                     categoryOptionComboIdScheme: "UID",
@@ -58,7 +57,7 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
                     dataSet,
                     dataElementGroup,
                     orgUnit,
-                    lastUpdated: moment(lastUpdated).format("YYYY-MM-DD"),
+                    lastUpdated: lastUpdated ? moment(lastUpdated).format("YYYY-MM-DD") : undefined,
                 })
                 .getData();
 
@@ -159,8 +158,10 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
                             orgUnit,
                             value,
                             comment,
-                            attributeOptionCombo:
-                                attributeOptionCombo ?? defaultCategoryOptionCombo,
+                            // Special scenario: For indicators do not send attributeOptionCombo
+                            attributeOptionCombo: includeCategories
+                                ? attributeOptionCombo ?? defaultCategoryOptionCombo
+                                : undefined,
                             // Special scenario: We allow having dataElement.categoryOptionCombo in indicators
                             categoryOptionCombo: includeCategories
                                 ? categoryOptionCombo ?? defaultCategoryOptionCombo
@@ -181,7 +182,6 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
                                   period,
                                   orgUnit,
                                   categoryOptionCombo: defaultCategoryOptionCombo,
-                                  attributeOptionCombo: defaultCategoryOptionCombo,
                                   value: "0",
                                   comment: "[aggregated]",
                               }))
@@ -277,10 +277,8 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
         params: DataImportParams | undefined
     ): Promise<SynchronizationResult> {
         try {
-            const response = await this.api
-                // TODO: Use this.api.dataValues.postSet
-                .post<DataValueSetsPostResponse>(
-                    "/dataValueSets",
+            const { response } = await this.api.dataValues
+                .postSetAsync(
                     {
                         idScheme: params?.idScheme ?? "UID",
                         dataElementIdScheme: params?.dataElementIdScheme ?? "UID",
@@ -288,17 +286,25 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
                         preheatCache: params?.preheatCache ?? false,
                         skipExistingCheck: params?.skipExistingCheck ?? false,
                         skipAudit: params?.skipAudit ?? false,
-                        format: params?.format ?? "json",
-                        async: params?.async ?? false,
                         dryRun: params?.dryRun ?? false,
-                        // TODO: Use importStrategy here
-                        strategy: params?.strategy ?? "NEW_AND_UPDATES",
+                        importStrategy: params?.strategy ?? "CREATE_AND_UPDATE",
                     },
                     data
                 )
                 .getData();
 
-            return this.cleanAggregatedImportResponse(response);
+            const result = await this.api.system.waitFor(response.jobType, response.id).getData();
+
+            if (!result) {
+                return {
+                    status: "ERROR",
+                    instance: this.instance.toPublicObject(),
+                    date: new Date(),
+                    type: "aggregated",
+                };
+            }
+
+            return this.cleanAggregatedImportResponse(result);
         } catch (error) {
             if (error?.response?.data) {
                 return this.cleanAggregatedImportResponse(error.response.data);
@@ -378,7 +384,7 @@ export class AggregatedD2ApiRepository implements AggregatedRepository {
 
 const aggregations = {
     DAILY: { format: "YYYYMMDD", unit: "days" as const, amount: 1 },
-    WEEKLY: { format: "YYYY[W]W", unit: "weeks" as const, amount: 1 },
+    WEEKLY: { format: "GGGG[W]W", unit: "weeks" as const, amount: 1 },
     MONTHLY: { format: "YYYYMM", unit: "months" as const, amount: 1 },
     QUARTERLY: { format: "YYYY[Q]Q", unit: "quarters" as const, amount: 1 },
     YEARLY: { format: "YYYY", unit: "years" as const, amount: 1 },

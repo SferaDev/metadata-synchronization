@@ -4,7 +4,7 @@ import {
     ConfirmationDialogProps,
     useLoading,
     useSnackbar,
-} from "d2-ui-components";
+} from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -22,6 +22,7 @@ import {
     DataSetWithDataElementsModel,
     EventProgramWithDataElementsModel,
     EventProgramWithIndicatorsModel,
+    EventProgramWithProgramStagesModel,
     IndicatorMappedModel,
     ProgramIndicatorMappedModel,
 } from "../../../../../models/dhis/mapping";
@@ -73,10 +74,11 @@ const config: Record<
         title: i18n.t("Events Synchronization"),
         models: [
             EventProgramWithDataElementsModel,
+            EventProgramWithProgramStagesModel,
             EventProgramWithIndicatorsModel,
             ProgramIndicatorMappedModel,
         ],
-        childrenKeys: ["dataElements", "programIndicators"],
+        childrenKeys: ["dataElements", "programIndicators", "stages"],
     },
     deleted: {
         title: i18n.t("Deleted Objects Synchronization"),
@@ -166,74 +168,87 @@ const ManualSyncPage: React.FC = () => {
     const handleSynchronization = async (syncRule: SynchronizationRule) => {
         loading.show(true, i18n.t(`Synchronizing ${syncRule.type}`));
 
-        const result = await compositionRoot.sync.prepare(syncRule.type, syncRule.toBuilder());
-        const sync = compositionRoot.sync[syncRule.type](syncRule.toBuilder());
+        try {
+            const result = await compositionRoot.sync.prepare(syncRule.type, syncRule.toBuilder());
+            const sync = compositionRoot.sync[syncRule.type](syncRule.toBuilder());
 
-        const createPullRequest = () => {
-            if (!sourceInstance) {
-                snackbar.error(i18n.t("Unable to create pull request"));
+            const createPullRequest = () => {
+                if (!sourceInstance) {
+                    snackbar.error(i18n.t("Unable to create pull request"));
+                } else {
+                    setPullRequestProps({
+                        instance: sourceInstance,
+                        builder: syncRule.toBuilder(),
+                        type: syncRule.type,
+                    });
+                }
+            };
+
+            const synchronize = async () => {
+                for await (const { message, syncReport, done } of sync.execute()) {
+                    if (message) loading.show(true, message);
+                    if (syncReport) await compositionRoot.reports.save(syncReport);
+                    if (done) {
+                        finishSynchronization(syncReport);
+                        return;
+                    }
+                }
+            };
+
+            await result.match({
+                success: async () => {
+                    await synchronize();
+                },
+                error: async code => {
+                    switch (code) {
+                        case "PULL_REQUEST":
+                            createPullRequest();
+                            break;
+                        case "PULL_REQUEST_RESPONSIBLE":
+                            updateDialog({
+                                title: i18n.t("Pull metadata"),
+                                description: i18n.t(
+                                    "You are one of the reponsibles for the selected items.\nDo you want to directly pull the metadata?"
+                                ),
+                                onCancel: () => {
+                                    updateDialog(null);
+                                },
+                                onSave: async () => {
+                                    updateDialog(null);
+                                    await synchronize();
+                                },
+                                onInfoAction: () => {
+                                    updateDialog(null);
+                                    createPullRequest();
+                                },
+                                cancelText: i18n.t("Cancel"),
+                                saveText: i18n.t("Proceed"),
+                                infoActionText: i18n.t("Create pull request"),
+                            });
+                            break;
+                        case "INSTANCE_NOT_FOUND":
+                            snackbar.warning(i18n.t("Couldn't connect with instance"));
+                            break;
+                        default:
+                            snackbar.error(i18n.t("Unknown synchronization error"));
+                    }
+                },
+            });
+
+            loading.reset();
+            closeDialogs();
+        } catch (error) {
+            loading.reset();
+            if (error.response?.status === 403) {
+                snackbar.error(
+                    i18n.t(
+                        "You do not have the authority to one or multiple target instances of the sync rule"
+                    )
+                );
             } else {
-                setPullRequestProps({
-                    instance: sourceInstance,
-                    builder: syncRule.toBuilder(),
-                    type: syncRule.type,
-                });
+                snackbar.error(i18n.t("An error has ocurred during the synchronization"));
             }
-        };
-
-        const synchronize = async () => {
-            for await (const { message, syncReport, done } of sync.execute()) {
-                if (message) loading.show(true, message);
-                if (syncReport) await compositionRoot.reports.save(syncReport);
-                if (done) {
-                    finishSynchronization(syncReport);
-                    return;
-                }
-            }
-        };
-
-        await result.match({
-            success: async () => {
-                await synchronize();
-            },
-            error: async code => {
-                switch (code) {
-                    case "PULL_REQUEST":
-                        createPullRequest();
-                        break;
-                    case "PULL_REQUEST_RESPONSIBLE":
-                        updateDialog({
-                            title: i18n.t("Pull metadata"),
-                            description: i18n.t(
-                                "You are one of the reponsibles for the selected items.\nDo you want to directly pull the metadata?"
-                            ),
-                            onCancel: () => {
-                                updateDialog(null);
-                            },
-                            onSave: async () => {
-                                updateDialog(null);
-                                await synchronize();
-                            },
-                            onInfoAction: () => {
-                                updateDialog(null);
-                                createPullRequest();
-                            },
-                            cancelText: i18n.t("Cancel"),
-                            saveText: i18n.t("Proceed"),
-                            infoActionText: i18n.t("Create pull request"),
-                        });
-                        break;
-                    case "INSTANCE_NOT_FOUND":
-                        snackbar.warning(i18n.t("Couldn't connect with instance"));
-                        break;
-                    default:
-                        snackbar.error(i18n.t("Unknown synchronization error"));
-                }
-            },
-        });
-
-        loading.reset();
-        closeDialogs();
+        }
     };
 
     const additionalColumns = [

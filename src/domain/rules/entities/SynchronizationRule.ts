@@ -17,7 +17,6 @@ import {
     extractParentsFromRule,
 } from "../../../utils/metadataIncludeExclude";
 import { OldValidation } from "../../../utils/old-validations";
-import { UserInfo } from "../../../utils/permissions";
 import isValidCronExpression from "../../../utils/validCronExpression";
 import {
     DataSyncAggregation,
@@ -28,6 +27,8 @@ import { SharedRef } from "../../common/entities/Ref";
 import { SharingSetting } from "../../common/entities/SharingSetting";
 import { FilterRule } from "../../metadata/entities/FilterRule";
 import { SynchronizationType } from "../../synchronization/entities/SynchronizationType";
+import { NamedRef } from "../../common/entities/Ref";
+import { UserInfo } from "../../../utils/permissions";
 
 export class SynchronizationRule {
     private readonly syncRule: SynchronizationRuleData;
@@ -44,6 +45,7 @@ export class SynchronizationRule {
             "enabled",
             "frequency",
             "lastExecuted",
+            "lastExecutedBy",
             "lastUpdated",
             "lastUpdatedBy",
             "publicAccess",
@@ -138,8 +140,16 @@ export class SynchronizationRule {
         return this.syncRule.builder?.dataParams?.events ?? [];
     }
 
+    public get dataSyncTeis(): string[] {
+        return this.syncRule.builder?.dataParams?.teis ?? [];
+    }
+
     public get dataSyncAllEvents(): boolean {
         return this.syncRule.builder?.dataParams?.allEvents ?? true;
+    }
+
+    public get excludeTeiRelationships(): boolean {
+        return this.syncRule.builder?.dataParams?.excludeTeiRelationships ?? false;
     }
 
     public get dataSyncEnableAggregation(): boolean | undefined {
@@ -172,6 +182,22 @@ export class SynchronizationRule {
 
     public get lastExecuted(): Date | undefined {
         return this.syncRule.lastExecuted ? new Date(this.syncRule.lastExecuted) : undefined;
+    }
+
+    public get lastExecutedBy(): string | undefined {
+        return this.syncRule.lastExecutedBy?.name;
+    }
+
+    public get created(): Date | undefined {
+        return this.syncRule.created ? new Date(this.syncRule.created) : undefined;
+    }
+
+    public get lastUpdated(): Date | undefined {
+        return this.syncRule.lastUpdated ? new Date(this.syncRule.lastUpdated) : undefined;
+    }
+
+    public get lastUpdatedBy(): string | undefined {
+        return this.syncRule.lastUpdatedBy?.name;
     }
 
     public get readableFrequency(): string | undefined {
@@ -228,6 +254,10 @@ export class SynchronizationRule {
             enabled: false,
             lastUpdated: new Date(),
             lastUpdatedBy: {
+                id: "",
+                name: "",
+            },
+            lastExecutedBy: {
                 id: "",
                 name: "",
             },
@@ -471,8 +501,16 @@ export class SynchronizationRule {
         return this.updateBuilderDataParams({ events });
     }
 
+    public updateDataSyncTEIs(teis?: string[]): SynchronizationRule {
+        return this.updateBuilderDataParams({ teis });
+    }
+
     public updateDataSyncAllEvents(allEvents?: boolean): SynchronizationRule {
         return this.updateBuilderDataParams({ allEvents });
+    }
+
+    public updateExcludeTeiRelationships(excludeTeiRelationships?: boolean): SynchronizationRule {
+        return this.updateBuilderDataParams({ excludeTeiRelationships });
     }
 
     public updateDataSyncEnableAggregation(enableAggregation?: boolean): SynchronizationRule {
@@ -523,8 +561,8 @@ export class SynchronizationRule {
         return this.update({ frequency });
     }
 
-    public updateLastExecuted(lastExecuted: Date): SynchronizationRule {
-        return this.update({ lastExecuted });
+    public updateLastExecuted(lastExecuted: Date, lastExecutedBy: NamedRef): SynchronizationRule {
+        return this.update({ lastExecuted, lastExecutedBy });
     }
 
     public isOnDemand() {
@@ -621,13 +659,14 @@ export class SynchronizationRule {
                       }
                     : null,
             ]),
-            dataSyncEvents: _.compact([
+            dataSyncEventsOrTeis: _.compact([
                 this.type === "events" &&
                 !this.dataSyncAllEvents &&
-                this.dataSyncEvents.length === 0
+                this.dataSyncEvents.length === 0 &&
+                this.dataSyncTeis.length === 0
                     ? {
                           key: "cannot_be_empty",
-                          namespace: { element: "event" },
+                          namespace: { element: "event or TEI" },
                       }
                     : null,
             ]),
@@ -684,6 +723,7 @@ export interface SynchronizationRuleData extends SharedRef {
     targetInstances: string[];
     enabled: boolean;
     lastExecuted?: Date;
+    lastExecutedBy?: NamedRef;
     frequency?: string;
     type: SynchronizationType;
 }

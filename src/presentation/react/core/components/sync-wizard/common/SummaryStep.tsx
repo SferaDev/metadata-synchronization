@@ -1,20 +1,21 @@
 import { Button, LinearProgress, makeStyles } from "@material-ui/core";
-import { ConfirmationDialog, useLoading, useSnackbar } from "d2-ui-components";
+import { ConfirmationDialog, useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Instance } from "../../../../../../domain/instance/entities/Instance";
 import { filterRuleToString } from "../../../../../../domain/metadata/entities/FilterRule";
+import {
+    MetadataEntities,
+    MetadataEntity,
+    MetadataPackage,
+} from "../../../../../../domain/metadata/entities/MetadataEntities";
 import { includeExcludeRulesFriendlyNames } from "../../../../../../domain/metadata/entities/MetadataFriendlyNames";
 import { cleanOrgUnitPaths } from "../../../../../../domain/synchronization/utils";
 import i18n from "../../../../../../locales";
 import { getValidationMessages } from "../../../../../../utils/old-validations";
-import {
-    availablePeriods,
-    getMetadata,
-    requestJSONDownload,
-} from "../../../../../../utils/synchronization";
+import { availablePeriods } from "../../../../../../utils/synchronization";
 import { useAppContext } from "../../../contexts/AppContext";
 import { buildAggregationItems } from "../data/AggregationStep";
 import { SyncWizardStepProps } from "../Steps";
@@ -53,7 +54,7 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
 
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [metadata, updateMetadata] = useState<Record<string, any[]>>({});
+    const [metadata, updateMetadata] = useState<MetadataPackage<MetadataEntity>>({});
     const [targetInstances, setTargetInstances] = useState<Instance[]>([]);
     const instanceOptions = buildInstanceOptions(targetInstances);
 
@@ -73,7 +74,7 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
             snackbar.error(errors.join("\n"));
         } else {
             const newSyncRule = syncRule.updateName(name);
-            await compositionRoot.rules.save(newSyncRule);
+            await compositionRoot.rules.save([newSyncRule]);
             history.push(`/sync-rules/${syncRule.type}/edit/${newSyncRule.id}`);
             onCancel();
         }
@@ -82,11 +83,32 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
     };
 
     const downloadJSON = async () => {
-        loading.show(true, "Generating JSON file");
-        const sync = compositionRoot.sync[syncRule.type](syncRule.toBuilder());
-        const payload = await sync.buildPayload();
-        requestJSONDownload(payload, syncRule);
-        loading.reset();
+        try {
+            loading.show(true, "Generating JSON file");
+            const result = await compositionRoot.rules.downloadPayloads(syncRule.id);
+
+            result.match({
+                success: () => {
+                    snackbar.success(i18n.t("Json files downloaded successfull"));
+                },
+                error: errors => {
+                    snackbar.error(errors.join("\n"));
+                },
+            });
+
+            loading.reset();
+        } catch (error) {
+            loading.reset();
+            if (error.response?.status === 403) {
+                snackbar.error(
+                    i18n.t(
+                        "You do not have the authority to one or multiple target instances of the sync rule"
+                    )
+                );
+            } else {
+                snackbar.error(i18n.t("An error has ocurred during the download"));
+            }
+        }
     };
 
     useEffect(() => {
@@ -96,9 +118,21 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
             ...syncRule.dataSyncAttributeCategoryOptions,
             ...cleanOrgUnitPaths(syncRule.dataSyncOrgUnitPaths),
         ];
-        getMetadata(api, ids, "id,name").then(updateMetadata);
+
+        compositionRoot.instances.getById(syncRule.originInstance).then(result => {
+            result.match({
+                error: () => snackbar.error(i18n.t("Invalid origin instance")),
+                success: instance => {
+                    //type is required to transform visualizations to charts and report tables
+                    compositionRoot.metadata
+                        .getByIds(ids, instance, "id,name,type")
+                        .then(updateMetadata);
+                },
+            });
+        });
+
         compositionRoot.instances.list().then(setTargetInstances);
-    }, [api, compositionRoot, syncRule]);
+    }, [compositionRoot, syncRule, snackbar]);
 
     const aggregationItems = useMemo(buildAggregationItems, []);
 
@@ -152,9 +186,12 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
                 </LiEntry>
 
                 {_.keys(metadata).map(metadataType => {
-                    const items = metadata[metadataType].filter(
+                    const itemsByType = metadata[metadataType as keyof MetadataEntities] || [];
+
+                    const items = itemsByType.filter(
                         ({ id }) => !syncRule.excludedIds.includes(id)
                     );
+
                     return (
                         items.length > 0 && (
                             <LiEntry
@@ -199,7 +236,11 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
                     >
                         <ul>
                             {syncRule.excludedIds.map(id => {
-                                const element = _(metadata).values().flatten().find({ id });
+                                const values = Object.keys(metadata).map(
+                                    key => metadata[key as keyof MetadataEntities]
+                                );
+
+                                const element = values.flat().find(element => element?.id === id);
 
                                 return (
                                     <LiEntry
@@ -271,6 +312,15 @@ const SaveStep = ({ syncRule, onCancel }: SyncWizardStepProps) => {
                             })}
                         </ul>
                     </LiEntry>
+                )}
+
+                {syncRule.type === "events" && (
+                    <LiEntry
+                        label={i18n.t("TEIs")}
+                        value={i18n.t("{{total}} selected TEIs", {
+                            total: syncRule.dataSyncTeis.length,
+                        })}
+                    />
                 )}
 
                 {syncRule.type === "events" && (

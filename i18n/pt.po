@@ -1,12 +1,18 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-01-22T09:15:45.194Z\n"
+"POT-Creation-Date: 2021-03-26T07:44:52.063Z\n"
 "PO-Revision-Date: 2020-07-10T06:53:30.625Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid ""
+"THIS NEW RELEASE INCLUDES SHARING SETTINGS PER INSTANCES. FOR THIS VERSION "
+"TO WORK PROPERLY, YOU WILL HAVE TO SET THE SHARING SETTINGS FOR EACH "
+"INSTANCE (Menu 'Instance Settings' > Contextual action 'Sharing settings')"
+msgstr ""
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -89,6 +95,13 @@ msgstr ""
 msgid "Select at least one date for fixed period on create"
 msgstr ""
 
+msgid ""
+"Your current DHIS2 version is {{version}}. This version does not come with "
+"share settings in the data store and, in consequence, there are not sharing "
+"settings for each instance. This is a potential risk and we highly recommend "
+"you to update your DHIS2 version."
+msgstr ""
+
 msgid "Version is not valid (ie. {{validExample}})"
 msgstr ""
 
@@ -98,19 +111,34 @@ msgstr ""
 msgid "deleted"
 msgstr ""
 
+msgid "An error has ocurred mapping payload for instance {{name}}"
+msgstr ""
+
+msgid "Instance {{id}} not found"
+msgstr ""
+
 msgid "Analytics execution finished on {{name}}"
 msgstr ""
 
 msgid "Preparing synchronization"
 msgstr ""
 
-msgid "Start import in instance {{instance}}"
+msgid "Importing in instance {{instance}}"
 msgstr ""
 
-msgid "Program with Data Elements"
+msgid "Event Program with Data Elements"
+msgstr ""
+
+msgid "Tracker Program with Program Stages"
 msgstr ""
 
 msgid "Program with Indicators"
+msgstr ""
+
+msgid "Tracked Entity Attribute (to TEI)"
+msgstr ""
+
+msgid "Tracked Entity Attribute (to DE)"
 msgstr ""
 
 msgid "Unauthorized - You do not have permission to view this page."
@@ -346,6 +374,9 @@ msgstr ""
 msgid "Preparing auto-mapping for {{total}} elements"
 msgstr ""
 
+msgid "Unable to apply auto-mapping"
+msgstr ""
+
 msgid "Could not find a suitable candidate to apply auto-mapping for {{id}}"
 msgstr ""
 
@@ -446,6 +477,12 @@ msgstr ""
 msgid "Program"
 msgstr ""
 
+msgid "Option set"
+msgstr ""
+
+msgid "Category"
+msgstr ""
+
 msgid "Only selected items"
 msgstr ""
 
@@ -473,6 +510,9 @@ msgid ""
 msgstr ""
 
 msgid "There are pending migrations"
+msgstr ""
+
+msgid "Ignore"
 msgstr ""
 
 msgid "Migrations finished successfully, you may now continue to the app"
@@ -586,6 +626,9 @@ msgid "{{n}} package(s) created successfully: {{list}}"
 msgstr ""
 
 msgid "{{n}} package(s) could not be created: {{list}}"
+msgstr ""
+
+msgid "Instance not found"
 msgstr ""
 
 msgid "Instances & Play Stores"
@@ -992,6 +1035,9 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
+msgid "Tracked Entity Instances"
+msgstr ""
+
 msgid "Unknown"
 msgstr ""
 
@@ -1101,6 +1147,9 @@ msgstr ""
 msgid "Programs"
 msgstr ""
 
+msgid "TEIs"
+msgstr ""
+
 msgid ""
 "If aggregation is enabled, the synchronization will use the Analytics "
 "endpoint and group data by organisation units children and the chosen time "
@@ -1118,9 +1167,6 @@ msgid "with logged user"
 msgstr ""
 
 msgid "Destination"
-msgstr ""
-
-msgid "Instance not found"
 msgstr ""
 
 msgid "Every day"
@@ -1148,6 +1194,20 @@ msgid "Cron expression"
 msgstr ""
 
 msgid "Cron expression must be valid"
+msgstr ""
+
+msgid "Json files downloaded successfull"
+msgstr ""
+
+msgid ""
+"You do not have the authority to one or multiple target instances of the "
+"sync rule"
+msgstr ""
+
+msgid "An error has ocurred during the download"
+msgstr ""
+
+msgid "Invalid origin instance"
 msgstr ""
 
 msgid "Cancel synchronization rule wizard"
@@ -1183,6 +1243,9 @@ msgid "Include rules"
 msgstr ""
 
 msgid "Exclude rules"
+msgstr ""
+
+msgid "{{total}} selected TEIs"
 msgstr ""
 
 msgid "All events"
@@ -1287,6 +1350,12 @@ msgstr ""
 msgid "You do not have assigned any organisation unit"
 msgstr ""
 
+msgid "Enrollment Date"
+msgstr ""
+
+msgid "Exclude relationships"
+msgstr ""
+
 msgid "Use sync rules periods"
 msgstr ""
 
@@ -1318,17 +1387,6 @@ msgid "Delete data values before sync"
 msgstr ""
 
 msgid "Check existing data values in previous periods"
-msgstr ""
-
-msgid "Data element filter"
-msgstr ""
-
-msgid "Data Element Group *"
-msgstr ""
-
-msgid ""
-"* Data Element Group: used to check existing data values in the destination "
-"data elements"
 msgstr ""
 
 msgid "Project minimum dates"
@@ -1533,6 +1591,9 @@ msgstr ""
 msgid "Run analytics"
 msgstr ""
 
+msgid "An error has ocurred editing share settings"
+msgstr ""
+
 msgid "Delete Instances?"
 msgstr ""
 
@@ -1602,6 +1663,9 @@ msgid "Please select at least one element from the table to synchronize"
 msgstr ""
 
 msgid "Unknown error with the request"
+msgstr ""
+
+msgid "An error has ocurred during the synchronization"
 msgstr ""
 
 msgid "New module"
@@ -1792,6 +1856,21 @@ msgstr ""
 msgid "Last executed"
 msgstr ""
 
+msgid "Last executed by"
+msgstr ""
+
+msgid "Last Updated"
+msgstr ""
+
+msgid "Last Updated By"
+msgstr ""
+
+msgid "Generating JSON file"
+msgstr ""
+
+msgid "Exporting synchronization rules"
+msgstr ""
+
 msgid "Deleting Sync Rules"
 msgstr ""
 
@@ -1806,10 +1885,37 @@ msgstr ""
 msgid "Successfully updated sync rule"
 msgstr ""
 
+msgid "Couldn't read the file because it's not valid"
+msgstr ""
+
+msgid "Importing rule(s)"
+msgstr ""
+
+msgid "Importing {{n}} rules"
+msgstr ""
+
+msgid "You have uploaded {{n}} rules with a wrong type."
+msgstr ""
+
+msgid "All the uploaded rules are invalid and cannot be imported."
+msgstr ""
+
+msgid "Existing (will be overwritten)"
+msgstr ""
+
+msgid "Imported {{n}} rules"
+msgstr ""
+
 msgid "Execute"
 msgstr ""
 
+msgid "Export rule"
+msgstr ""
+
 msgid "Toggle scheduling"
+msgstr ""
+
+msgid "Import sync rules"
 msgstr ""
 
 msgid "Last executed date"
@@ -1862,18 +1968,16 @@ msgstr ""
 msgid "Retrieving information from the system..."
 msgstr ""
 
-msgid "Starting Aggregate Data..."
+msgid "Synchronizing aggregated data..."
 msgstr ""
 
 msgid "Run analytics is disabled, last analytics execution: {{lastExecution}}"
 msgstr ""
 
-msgid ""
-"Deleting previous data values is not possible because data element group is "
-"not defined, please contact with your administrator"
+msgid "Finished aggregated data synchronization with errors"
 msgstr ""
 
-msgid "Finished Aggregate Data"
+msgid "Finished aggregated data synchronization successfully"
 msgstr ""
 
 msgid "Checking data values in previous periods ...."
@@ -1885,27 +1989,21 @@ msgstr ""
 msgid "Summary of Sync Rule"
 msgstr ""
 
-msgid "Finished Sync Rule {{name}}"
+msgid "Error found: {{message}}"
 msgstr ""
 
-msgid "Finished Sync Rule {{name}} with errors"
+msgid "Finished Sync Rule {{name}}"
 msgstr ""
 
 msgid "never"
 msgstr ""
 
-msgid "Error retrieving instance {{name}} to delete previoud data values"
-msgstr ""
-
-msgid "Error creating period"
+msgid "Error retrieving instance {{name}} to delete previous data values"
 msgstr ""
 
 msgid ""
 "Deleting previous data values in target instance {{name}} for period "
 "{{period}}..."
-msgstr ""
-
-msgid "Deleting previous data values for period {{period}} is not possible"
 msgstr ""
 
 msgid "Widget cannot be used until an administrator opens the application"
@@ -1930,6 +2028,9 @@ msgid "Action"
 msgstr ""
 
 msgid "Program Rule"
+msgstr ""
+
+msgid "Categories"
 msgstr ""
 
 msgid "Url"

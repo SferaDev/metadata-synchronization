@@ -19,11 +19,11 @@ import {
     AggregatedDataStats,
     EventsDataStats,
     SynchronizationReport,
-    SynchronizationReportStatus
+    SynchronizationReportStatus,
 } from "../../reports/entities/SynchronizationReport";
 import {
     SynchronizationResult,
-    SynchronizationStatus
+    SynchronizationStatus,
 } from "../../reports/entities/SynchronizationResult";
 import { SynchronizationBuilder } from "../entities/SynchronizationBuilder";
 import { SynchronizationPayload } from "../entities/SynchronizationPayload";
@@ -37,7 +37,7 @@ export type SynchronizationClass =
 
 export abstract class GenericSyncUseCase {
     public abstract readonly type: SynchronizationType;
-    public readonly fields: string = "id,name";
+    public readonly fields: string = "id,name,type"; //type is required to transform visualizations to charts and report tables
     protected readonly api: D2Api;
 
     constructor(
@@ -108,7 +108,13 @@ export abstract class GenericSyncUseCase {
     }
 
     @cache()
-    protected async getOriginInstance(): Promise<Instance> {
+    protected async getTeisRepository(remoteInstance?: Instance) {
+        const defaultInstance = await this.getOriginInstance();
+        return this.repositoryFactory.teisRepository(remoteInstance ?? defaultInstance);
+    }
+
+    @cache()
+    public async getOriginInstance(): Promise<Instance> {
         const { originInstance: originInstanceId } = this.builder;
         const instance = await this.getInstanceById(originInstanceId);
         if (!instance) throw new Error("Unable to read origin instance");
@@ -116,7 +122,7 @@ export abstract class GenericSyncUseCase {
     }
 
     @cache()
-    protected async getMapping(instance: Instance): Promise<MetadataMappingDictionary> {
+    public async getMapping(instance: Instance): Promise<MetadataMappingDictionary> {
         const { originInstance: originInstanceId } = this.builder;
 
         // If sync is LOCAL -> REMOTE, use the destination instance mapping
@@ -227,7 +233,7 @@ export abstract class GenericSyncUseCase {
         yield { syncReport };
         for (const instance of targetInstances) {
             yield {
-                message: i18n.t("Start import in instance {{instance}}", {
+                message: i18n.t("Importing in instance {{instance}}", {
                     instance: instance.name,
                     interpolation: { escapeValue: false },
                 }),
@@ -254,15 +260,23 @@ export abstract class GenericSyncUseCase {
             yield { syncReport };
         }
 
-        // Phase 4: Update sync rule last executed date
+        // Phase 4: Update sync rule last executed date and last executed user name and id
         if (syncRule) {
             const oldRule = await this.repositoryFactory
                 .rulesRepository(this.localInstance)
                 .getById(syncRule);
 
             if (oldRule) {
-                const updatedRule = oldRule.updateLastExecuted(new Date());
-                await this.repositoryFactory.rulesRepository(this.localInstance).save(updatedRule);
+                const currentUser = await this.api.currentUser
+                    .get({ fields: { userCredentials: { name: true }, id: true } })
+                    .getData();
+                const updatedRule = oldRule.updateLastExecuted(new Date(), {
+                    id: currentUser.id,
+                    name: currentUser.userCredentials.name,
+                });
+                await this.repositoryFactory
+                    .rulesRepository(this.localInstance)
+                    .save([updatedRule]);
             }
         }
 

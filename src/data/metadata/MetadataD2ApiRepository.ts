@@ -1,4 +1,4 @@
-import { FilterBase, FilterValueBase } from "d2-api/api/common";
+import { FilterBase, FilterValueBase } from "@eyeseetea/d2-api/api/common";
 import _ from "lodash";
 import moment from "moment";
 import { buildPeriodFromParams } from "../../domain/aggregated/utils";
@@ -65,13 +65,32 @@ export class MetadataD2ApiRepository implements MetadataRepository {
         const requestFields = typeof fields === "object" ? getFieldsAsString(fields) : fields;
         const d2Metadata = await this.getMetadata<D2Model>(ids, requestFields, includeDefaults);
 
-        const metadataPackage = this.transformationRepository.mapPackageFrom(
-            apiVersion,
-            d2Metadata,
-            metadataTransformations
-        );
+        if (apiVersion >= 32 && d2Metadata["dashboards"] && fields === undefined) {
+            //Fix dashboard bug from 2.32
+            //It's necessary request again dashboards retrieving viualizations with type to transforms
+            //type is necessary to transform from visualizations to chart and report table
+            const fixedD2Metadata = await this.getMetadata<D2Model>(
+                ids,
+                ":all,dashboardItems[:all,visualization[id,type]]",
+                includeDefaults
+            );
 
-        return metadataPackage as T;
+            const metadataPackage = this.transformationRepository.mapPackageFrom(
+                apiVersion,
+                fixedD2Metadata,
+                metadataTransformations
+            );
+
+            return metadataPackage as T;
+        } else {
+            const metadataPackage = this.transformationRepository.mapPackageFrom(
+                apiVersion,
+                d2Metadata,
+                metadataTransformations
+            );
+
+            return metadataPackage as T;
+        }
     }
 
     @cache()
@@ -85,6 +104,7 @@ export class MetadataD2ApiRepository implements MetadataRepository {
             rootJunction,
             ...params
         } = listParams;
+
         const filter = this.buildListFilters(params);
         const { apiVersion } = this.instance;
         const options = { type, fields, filter, order, page, pageSize, rootJunction };
@@ -284,6 +304,8 @@ export class MetadataD2ApiRepository implements MetadataRepository {
         group,
         level,
         program,
+        optionSet,
+        category,
         includeParents,
         parents,
         showOnlySelected,
@@ -291,6 +313,8 @@ export class MetadataD2ApiRepository implements MetadataRepository {
         filterRows,
         search,
         disableFilterRows = false,
+        programType,
+        childrenPropInList,
     }: Partial<ListMetadataParams>) {
         const filter: Dictionary<FilterValueBase> = {};
 
@@ -298,6 +322,14 @@ export class MetadataD2ApiRepository implements MetadataRepository {
         if (group) filter[`${group.type}.id`] = { eq: group.value };
         if (level) filter["level"] = { eq: level };
         if (program) filter["program.id"] = { eq: program };
+        if (childrenPropInList) filter[childrenPropInList.prop] = { in: childrenPropInList.values };
+
+        if (programType) {
+            filter["programType"] = { eq: programType };
+        }
+
+        if (optionSet) filter["optionSet.id"] = { eq: optionSet };
+        if (category) filter["categories.id"] = { eq: category };
         if (includeParents && isNotEmpty(parents)) {
             filter["parent.id"] = { in: cleanOrgUnitPaths(parents) };
         }
@@ -325,6 +357,16 @@ export class MetadataD2ApiRepository implements MetadataRepository {
 
         try {
             const response = await this.postMetadata(versionedPayloadPackage, additionalParams);
+
+            if (!response) {
+                return {
+                    status: "ERROR",
+                    instance: this.instance.toPublicObject(),
+                    date: new Date(),
+                    type: "metadata",
+                };
+            }
+
             return this.cleanMetadataImportResponse(response, "metadata");
         } catch (error) {
             if (error?.response?.data) {
@@ -358,6 +400,15 @@ export class MetadataD2ApiRepository implements MetadataRepository {
                 ...additionalParams,
                 importStrategy: "DELETE",
             });
+
+            if (!response) {
+                return {
+                    status: "ERROR",
+                    instance: this.instance.toPublicObject(),
+                    date: new Date(),
+                    type: "deleted",
+                };
+            }
 
             return this.cleanMetadataImportResponse(response, "deleted");
         } catch (error) {
@@ -467,9 +518,9 @@ export class MetadataD2ApiRepository implements MetadataRepository {
     private async postMetadata(
         payload: Partial<Record<string, unknown[]>>,
         additionalParams?: MetadataImportParams
-    ): Promise<MetadataResponse> {
-        const response = await this.api.metadata
-            .post(payload, {
+    ): Promise<MetadataResponse | null> {
+        const { response } = await this.api.metadata
+            .postAsync(payload, {
                 importMode: "COMMIT",
                 identifier: "UID",
                 importReportMode: "FULL",
@@ -480,7 +531,8 @@ export class MetadataD2ApiRepository implements MetadataRepository {
             })
             .getData();
 
-        return response;
+        const result = await this.api.system.waitFor(response.jobType, response.id).getData();
+        return result;
     }
 
     private async getMetadata<T>(

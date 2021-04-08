@@ -1,4 +1,4 @@
-import { ObjectsTableDetailField, TableColumn } from "d2-ui-components";
+import { ObjectsTableDetailField, TableColumn } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import i18n from "../locales";
 import { D2Model } from "../models/dhis/default";
@@ -72,6 +72,30 @@ export const programIndicatorColumns: typeof d2BaseModelColumns = [
     { name: "shortName", text: i18n.t("Short name"), sortable: true, hidden: true },
     { name: "code", text: i18n.t("Code"), sortable: true, hidden: true },
     { name: "program", text: i18n.t("Program"), sortable: true },
+    { name: "description", text: i18n.t("Description"), sortable: true, hidden: true },
+    { name: "created", text: i18n.t("Created"), sortable: true, hidden: true },
+    { name: "lastUpdated", text: i18n.t("Last updated"), sortable: true },
+    { name: "id", text: i18n.t("ID"), sortable: true, hidden: true },
+    { name: "href", text: i18n.t("API link"), sortable: false, hidden: true },
+];
+
+export const optionColumns: typeof d2BaseModelColumns = [
+    { name: "displayName", text: i18n.t("Name"), sortable: true },
+    { name: "shortName", text: i18n.t("Short name"), sortable: true, hidden: true },
+    { name: "code", text: i18n.t("Code"), sortable: true, hidden: true },
+    { name: "optionSet", text: i18n.t("Option set"), sortable: true },
+    { name: "description", text: i18n.t("Description"), sortable: true, hidden: true },
+    { name: "created", text: i18n.t("Created"), sortable: true, hidden: true },
+    { name: "lastUpdated", text: i18n.t("Last updated"), sortable: true },
+    { name: "id", text: i18n.t("ID"), sortable: true, hidden: true },
+    { name: "href", text: i18n.t("API link"), sortable: false, hidden: true },
+];
+
+export const categoryOptionColumns: typeof d2BaseModelColumns = [
+    { name: "displayName", text: i18n.t("Name"), sortable: true },
+    { name: "shortName", text: i18n.t("Short name"), sortable: true, hidden: true },
+    { name: "code", text: i18n.t("Code"), sortable: true, hidden: true },
+    { name: "categories", text: i18n.t("Categories"), sortable: true },
     { name: "description", text: i18n.t("Description"), sortable: true, hidden: true },
     { name: "created", text: i18n.t("Created"), sortable: true, hidden: true },
     { name: "lastUpdated", text: i18n.t("Last updated"), sortable: true },
@@ -200,4 +224,9 @@ export const documentFields = {
     ...d2BaseModelFields,
     url: include,
     external: include,
+};
+
+export const TrackedEntityAttributesFields = {
+    ...d2BaseModelFields,
+    optionSet: include,
 };

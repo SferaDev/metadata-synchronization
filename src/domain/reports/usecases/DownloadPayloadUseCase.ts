@@ -1,5 +1,6 @@
 import _ from "lodash";
 import moment from "moment";
+import { metadataTransformations } from "../../../data/transformations/PackageTransformations";
 import { cache } from "../../../utils/cache";
 import { promiseMap } from "../../../utils/common";
 import { UseCase } from "../../common/entities/UseCase";
@@ -13,23 +14,38 @@ export class DownloadPayloadUseCase implements UseCase {
 
     public async execute(reports: SynchronizationReport[]): Promise<void> {
         const date = moment().format("YYYYMMDDHHmm");
+        const instanceRepository = this.repositoryFactory.instanceRepository(this.localInstance);
 
         const fetchPayload = async (report: SynchronizationReport) => {
             const syncRule = await this.getSyncRule(report.syncRule);
             const results = report.getResults().filter(({ payload }) => !!payload);
 
-            return results.map(result => ({
-                name: _([
-                    "synchronization",
-                    syncRule?.name,
-                    result?.type,
-                    result?.instance.name,
-                    date,
-                ])
-                    .compact()
-                    .kebabCase(),
-                content: result.payload,
-            }));
+            return await promiseMap(results, async result => {
+                const instance = await instanceRepository.getById(result.instance.id);
+
+                const apiVersion = instance?.apiVersion;
+
+                const payload = apiVersion
+                    ? this.repositoryFactory
+                          .transformationRepository()
+                          .mapPackageTo(apiVersion, result.payload, metadataTransformations)
+                    : result.payload;
+
+                const downloadItem = {
+                    name: _([
+                        "synchronization",
+                        syncRule?.name,
+                        result?.type,
+                        result?.instance.name,
+                        date,
+                    ])
+                        .compact()
+                        .kebabCase(),
+                    content: payload,
+                };
+
+                return downloadItem;
+            });
         };
 
         const files = _(await promiseMap(reports, fetchPayload))

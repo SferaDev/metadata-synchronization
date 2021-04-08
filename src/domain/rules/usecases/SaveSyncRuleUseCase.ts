@@ -6,10 +6,7 @@ import { SynchronizationRule } from "../entities/SynchronizationRule";
 export class SaveSyncRuleUseCase implements UseCase {
     constructor(private repositoryFactory: RepositoryFactory, private localInstance: Instance) {}
 
-    public async execute(report: SynchronizationRule): Promise<void> {
-        const user = await this.repositoryFactory.instanceRepository(this.localInstance).getUser();
-        const persistedReport = report.update({ lastUpdated: new Date(), lastUpdatedBy: user });
-
-        await this.repositoryFactory.rulesRepository(this.localInstance).save(persistedReport);
+    public async execute(rules: SynchronizationRule[]): Promise<void> {
+        await this.repositoryFactory.rulesRepository(this.localInstance).save(rules);
     }
 }

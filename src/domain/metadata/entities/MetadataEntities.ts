@@ -3617,6 +3617,38 @@ export type Visualization = {
     yearlySeries: string[];
 };
 
+export type SqlView = {
+    access: Access;
+    attributeValues: AttributeValue[];
+    cacheStrategy:
+        | "NO_CACHE"
+        | "CACHE_15_MINUTES"
+        | "CACHE_30_MINUTES"
+        | "CACHE_1_HOUR"
+        | "CACHE_6AM_TOMORROW"
+        | "CACHE_TWO_WEEKS"
+        | "RESPECT_SYSTEM_SETTING";
+    code: Id;
+    created: string;
+    description: string;
+    displayName: string;
+    externalAccess: boolean;
+    favorite: boolean;
+    favorites: string[];
+    href: string;
+    id: Id;
+    lastUpdated: string;
+    lastUpdatedBy: Ref;
+    name: string;
+    publicAccess: string;
+    sqlQuery: string;
+    translations: Translation[];
+    type: "VIEW" | "MATERIALIZED_VIEW" | "QUERY";
+    user: Ref;
+    userAccesses: UserAccess[];
+    userGroupAccesses: UserGroupAccess[];
+};
+
 export type MetadataEntity =
     | UserRole
     | Attribute
@@ -3678,7 +3710,8 @@ export type MetadataEntity =
     | Document
     | Dashboard
     | MessageConversation
-    | Visualization;
+    | Visualization
+    | SqlView;
 
 export type MetadataKey = "userRoles" | "attributes" | "";
 
@@ -3746,6 +3779,7 @@ export type MetadataEntities = {
     dashboards: Dashboard[];
     messageConversations: MessageConversation[];
     visualizations: Visualization[];
+    sqlViews: SqlView[];
 };
 
 export type MetadataPackage<T = MetadataEntity> = Partial<Record<keyof MetadataEntities, T[]>>;

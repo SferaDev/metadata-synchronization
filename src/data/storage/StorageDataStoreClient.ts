@@ -1,12 +1,12 @@
 import _ from "lodash";
 import { Instance } from "../../domain/instance/entities/Instance";
-import { StorageClient } from "../../domain/storage/repositories/StorageClient";
+import { ObjectSharing, StorageClient } from "../../domain/storage/repositories/StorageClient";
 import { D2Api, DataStore } from "../../types/d2-api";
 import { Dictionary } from "../../types/utils";
 import { promiseMap } from "../../utils/common";
 import { getD2APiFromInstance } from "../../utils/d2-utils";
 
-const dataStoreNamespace = "metadata-synchronization";
+export const dataStoreNamespace = "metadata-synchronization";
 
 export class StorageDataStoreClient extends StorageClient {
     public type = "dataStore" as const;
@@ -51,7 +51,7 @@ export class StorageDataStoreClient extends StorageClient {
     }
 
     public async clone(): Promise<Dictionary<unknown>> {
-        const keys = await this.dataStore.getKeys().getData();
+        const keys = await this.listKeys();
 
         const pairs = await promiseMap(keys, async key => {
             const value = await this.getObject(key);
@@ -71,5 +71,35 @@ export class StorageDataStoreClient extends StorageClient {
 
     public async listKeys(): Promise<string[]> {
         return this.dataStore.getKeys().getData();
+    }
+
+    public async getObjectSharing(key: string): Promise<ObjectSharing | undefined> {
+        const {
+            user,
+            userAccesses,
+            userGroupAccesses,
+            publicAccess,
+            externalAccess,
+        } = await this.getMetadataByKey(key);
+
+        return {
+            user: { ...user, name: "" },
+            userAccesses,
+            userGroupAccesses,
+            publicAccess,
+            externalAccess,
+        };
+    }
+
+    public async saveObjectSharing(key: string, object: ObjectSharing): Promise<void> {
+        const { id } = await this.getMetadataByKey(key);
+        await this.api.sharing.post({ type: "dataStore", id }, object).getData();
+    }
+
+    private async getMetadataByKey(key: string) {
+        const data = await this.dataStore.getMetadata(key).getData();
+        if (!data) throw new Error(`Invalid dataStore key ${key}`);
+
+        return data;
     }
 }
