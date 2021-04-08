@@ -12,7 +12,7 @@ export function buildPeriodFromParams(
             startDate: moment(startDate ?? "1970-01-01"),
             endDate: moment(endDate ?? moment().add(1, "years").endOf("year").format("YYYY-MM-DD")),
         };
-    } else if (period === "SINCE_LAST_EXECUTED_DATE") {
+    } else if (period === "LAST_EXECUTION") {
         return {
             startDate: moment(startDate ?? "1970-01-01"),
             endDate: moment(),

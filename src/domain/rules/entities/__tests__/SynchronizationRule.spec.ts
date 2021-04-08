@@ -539,7 +539,7 @@ describe("SyncRule", () => {
 
             const editedSyncRule = syncRule
                 .updateLastExecuted(lastExecuted, { id: "", name: "" })
-                .updateDataSyncPeriod("SINCE_LAST_EXECUTED_DATE");
+                .updateDataSyncPeriod("LAST_EXECUTION");
 
             expect(editedSyncRule.dataSyncStartDate).toEqual(lastExecuted);
         });
@@ -548,7 +548,7 @@ describe("SyncRule", () => {
 
             const now = new Date();
 
-            const editedSyncRule = syncRule.updateDataSyncPeriod("SINCE_LAST_EXECUTED_DATE");
+            const editedSyncRule = syncRule.updateDataSyncPeriod("LAST_EXECUTION");
 
             expect(editedSyncRule.dataSyncStartDate.getDay()).toEqual(now.getDay());
             expect(editedSyncRule.dataSyncStartDate.getMonth()).toEqual(now.getMonth());
@@ -559,7 +559,7 @@ describe("SyncRule", () => {
 
             const syncRuleData = givenASyncRuleWithoutPeriod()
                 .updateLastExecuted(lastExecuted, { id: "", name: "" })
-                .updateDataSyncPeriod("SINCE_LAST_EXECUTED_DATE")
+                .updateDataSyncPeriod("LAST_EXECUTION")
                 .toObject();
 
             const syncRule = SynchronizationRule.build(syncRuleData);
@@ -570,7 +570,7 @@ describe("SyncRule", () => {
             const now = new Date();
 
             const syncRuleData = givenASyncRuleWithoutPeriod()
-                .updateDataSyncPeriod("SINCE_LAST_EXECUTED_DATE")
+                .updateDataSyncPeriod("LAST_EXECUTION")
                 .toObject();
 
             const syncRule = SynchronizationRule.build(syncRuleData);
