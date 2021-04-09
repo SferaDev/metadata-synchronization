@@ -2,6 +2,9 @@ import moment, { Moment } from "moment";
 import { availablePeriods } from "../../utils/synchronization";
 import { DataSynchronizationParams } from "./entities/DataSynchronizationParams";
 
+/**
+ * @deprecated This function should not be used, please use SyncRule.dataPeriodFilter
+ */
 export function buildPeriodFromParams(
     params: Pick<DataSynchronizationParams, "period" | "startDate" | "endDate">
 ): { startDate: Moment; endDate: Moment } {
