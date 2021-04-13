@@ -1,4 +1,3 @@
-import { Either } from "../../common/entities/Either";
 import { ConfigRepository } from "../../config/repositories/ConfigRepository";
 import { UserRepository } from "../../user/repositories/UserRepository";
 import { SynchronizationRule } from "../entities/SynchronizationRule";
@@ -12,5 +11,4 @@ export interface RulesRepository {
     list(): Promise<SynchronizationRule[]>;
     save(rules: SynchronizationRule[]): Promise<void>;
     delete(id: string): Promise<void>;
-    readFiles(files: File[]): Promise<Either<string, SynchronizationRule>[]>;
 }

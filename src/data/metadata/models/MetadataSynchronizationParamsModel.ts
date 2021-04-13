@@ -38,12 +38,12 @@ export const MetadataImportParamsModel: Codec<MetadataImportParams> = Schema.obj
 export const MetadataSynchronizationParamsModel: Codec<MetadataSynchronizationParams> = Schema.extend(
     MetadataImportParamsModel,
     Schema.object({
-        enableMapping: Schema.boolean,
-        includeSharingSettings: Schema.boolean,
-        removeOrgUnitReferences: Schema.boolean,
+        enableMapping: Schema.optionalSafe(Schema.boolean, false),
+        includeSharingSettings: Schema.optionalSafe(Schema.boolean, true),
+        removeOrgUnitReferences: Schema.optionalSafe(Schema.boolean, false),
         removeUserObjects: Schema.optional(Schema.boolean),
         removeOrgUnitObjects: Schema.optional(Schema.boolean),
-        useDefaultIncludeExclude: Schema.boolean,
+        useDefaultIncludeExclude: Schema.optionalSafe(Schema.boolean, true),
         metadataIncludeExcludeRules: Schema.optional(MetadataIncludeExcludeRulesModel),
     })
 );
