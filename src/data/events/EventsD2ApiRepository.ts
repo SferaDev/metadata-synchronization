@@ -3,9 +3,9 @@ import _ from "lodash";
 import moment from "moment";
 import {
     DataImportParams,
+    DataPeriodFilter,
     DataSynchronizationParams,
 } from "../../domain/aggregated/entities/DataSynchronizationParams";
-import { buildPeriodFromParams } from "../../domain/aggregated/utils";
 import { EventsPackage } from "../../domain/events/entities/EventsPackage";
 import { ProgramEvent } from "../../domain/events/entities/ProgramEvent";
 import { EventsRepository } from "../../domain/events/repositories/EventsRepository";
@@ -27,18 +27,19 @@ export class EventsD2ApiRepository implements EventsRepository {
     }
 
     public async getEvents(
+        dataPeriodFilter: DataPeriodFilter,
         params: DataSynchronizationParams,
         programStageIds: string[] = [],
-        defaults: string[] = []
+        defaults: string[] = [],
     ): Promise<ProgramEvent[]> {
         const { allEvents = false, orgUnitPaths = [] } = params;
 
         if (!allEvents) {
             return this.getSpecificEvents(params, programStageIds, defaults);
         } else if (allEvents && orgUnitPaths.length < 25) {
-            return this.getEventsByOrgUnit(params, programStageIds, defaults);
+            return this.getEventsByOrgUnit(dataPeriodFilter, params, programStageIds, defaults);
         } else {
-            return this.getAllEvents(params, programStageIds, defaults);
+            return this.getAllEvents(dataPeriodFilter, params, programStageIds, defaults);
         }
     }
 
@@ -55,6 +56,7 @@ export class EventsD2ApiRepository implements EventsRepository {
      *    the available pages so that we can filter them afterwards
      */
     private async getAllEvents(
+        dataPeriodFilter: DataPeriodFilter,
         params: DataSynchronizationParams,
         programStageIds: string[] = [],
         defaults: string[] = []
@@ -62,7 +64,7 @@ export class EventsD2ApiRepository implements EventsRepository {
         if (programStageIds.length === 0) return [];
 
         const { period, orgUnitPaths = [], lastUpdated } = params;
-        const { startDate, endDate } = buildPeriodFromParams(params);
+        const { startDate, endDate } = dataPeriodFilter;
 
         const orgUnits = cleanOrgUnitPaths(orgUnitPaths);
 
@@ -103,6 +105,7 @@ export class EventsD2ApiRepository implements EventsRepository {
     }
 
     private async getEventsByOrgUnit(
+        dataPeriodFilter: DataPeriodFilter,
         params: DataSynchronizationParams,
         programStageIds: string[] = [],
         defaults: string[] = []
@@ -110,7 +113,7 @@ export class EventsD2ApiRepository implements EventsRepository {
         if (programStageIds.length === 0) return [];
 
         const { period, orgUnitPaths = [], lastUpdated } = params;
-        const { startDate, endDate } = buildPeriodFromParams(params);
+        const { startDate, endDate } = dataPeriodFilter;
 
         const orgUnits = cleanOrgUnitPaths(orgUnitPaths);
 

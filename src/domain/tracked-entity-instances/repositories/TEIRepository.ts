@@ -1,5 +1,6 @@
 import {
     DataImportParams,
+    DataPeriodFilter,
     DataSynchronizationParams,
 } from "../../aggregated/entities/DataSynchronizationParams";
 import { Instance } from "../../instance/entities/Instance";
@@ -8,11 +9,11 @@ import { TEIsPackage } from "../entities/TEIsPackage";
 import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 
 export interface TEIRepositoryConstructor {
-    new (instance: Instance): TEIRepository;
+    new(instance: Instance): TEIRepository;
 }
 
 export interface TEIRepository {
-    getTEIs(params: DataSynchronizationParams, program: string): Promise<TrackedEntityInstance[]>;
+    getTEIs(dataPeriodFilter: DataPeriodFilter, params: DataSynchronizationParams, program: string): Promise<TrackedEntityInstance[]>;
     getTEIsById(params: DataSynchronizationParams, ids: string[]): Promise<TrackedEntityInstance[]>;
 
     save(

@@ -1,9 +1,9 @@
 import _ from "lodash";
 import {
     DataImportParams,
+    DataPeriodFilter,
     DataSynchronizationParams,
 } from "../../domain/aggregated/entities/DataSynchronizationParams";
-import { buildPeriodFromParams } from "../../domain/aggregated/utils";
 import { Instance } from "../../domain/instance/entities/Instance";
 import {
     SynchronizationResult,
@@ -29,11 +29,12 @@ export class TEID2ApiRepository implements TEIRepository {
         this.api = getD2APiFromInstance(instance);
     }
     async getTEIs(
+        dataPeriodFilter: DataPeriodFilter,
         params: DataSynchronizationParams,
         program: string
     ): Promise<TrackedEntityInstance[]> {
         const { period, orgUnitPaths = [] } = params;
-        const { startDate, endDate } = buildPeriodFromParams(params);
+        const { startDate, endDate } = dataPeriodFilter;
 
         const orgUnits = cleanOrgUnitPaths(orgUnitPaths);
 

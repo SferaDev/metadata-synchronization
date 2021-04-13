@@ -43,7 +43,10 @@ export default function EventsSelectionStep({ syncRule, onChange }: SyncWizardSt
     const [error, setError] = useState<unknown>();
 
     useEffect(() => {
-        const sync = compositionRoot.sync.events(memoizedSyncRule.toBuilder());
+        const sync = compositionRoot.sync.events(
+            memoizedSyncRule.dataPeriodFilter,
+            memoizedSyncRule.toBuilder()
+        );
 
         extractAllPrograms<CustomProgram>(compositionRoot, sync).then(setPrograms);
     }, [memoizedSyncRule, compositionRoot]);
@@ -58,6 +61,7 @@ export default function EventsSelectionStep({ syncRule, onChange }: SyncWizardSt
                     compositionRoot.events
                         .list(
                             instance,
+                            memoizedSyncRule.dataPeriodFilter,
                             {
                                 ...memoizedSyncRule.dataParams,
                                 allEvents: true,

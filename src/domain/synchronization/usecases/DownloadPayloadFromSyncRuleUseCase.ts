@@ -39,13 +39,16 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
         private repositoryFactory: RepositoryFactory,
         private localInstance: Instance,
         protected readonly encryptionKey: string
-    ) {}
+    ) { }
 
     async execute(params: DownloadPayloadParams): Promise<Either<DownloadErrors, true>> {
         const rule = await this.getSyncRule(params);
         if (!rule) return Either.success(true);
 
-        const sync: GenericSyncUseCase = this.compositionRoot.sync[rule.type](rule.toBuilder());
+        const sync = rule.type === "events" ?
+            this.compositionRoot.sync["events"](rule.dataPeriodFilter, rule.toBuilder()) :
+            this.compositionRoot.sync[rule.type](rule.toBuilder());
+
         const payload: SynchronizationPayload = await sync.buildPayload();
 
         const date = moment().format("YYYYMMDDHHmm");
@@ -54,11 +57,11 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
             rule.type === "events"
                 ? await this.mapEventsSyncRulePayloadToDownloadItems(rule, sync, payload)
                 : await this.mapToDownloadItems(
-                      rule,
-                      rule.type,
-                      instance => Promise.resolve(new GenericPackageMapper(instance, sync)),
-                      payload
-                  );
+                    rule,
+                    rule.type,
+                    instance => Promise.resolve(new GenericPackageMapper(instance, sync)),
+                    payload
+                );
 
         const errors = mappedData.filter(data => typeof data === "string") as string[];
         const files = _.compact(
@@ -135,11 +138,11 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
         const downloadItemsByEvents =
             events.length > 0
                 ? await this.mapToDownloadItems(
-                      rule,
-                      "events",
-                      instance => Promise.resolve(new GenericPackageMapper(instance, sync)),
-                      { events }
-                  )
+                    rule,
+                    "events",
+                    instance => Promise.resolve(new GenericPackageMapper(instance, sync)),
+                    { events }
+                )
                 : [];
 
         const { trackedEntityInstances } = payload as TEIsPackage;
@@ -147,19 +150,19 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
         const downloadItemsByTEIS =
             trackedEntityInstances.length > 0
                 ? await this.mapToDownloadItems(
-                      rule,
-                      "trackedEntityInstances",
-                      async instance => {
-                          const mapping = await sync.getMapping(instance);
+                    rule,
+                    "trackedEntityInstances",
+                    async instance => {
+                        const mapping = await sync.getMapping(instance);
 
-                          return await createTEIsPayloadMapper(
-                              await this.getMetadataRepository(instance),
-                              trackedEntityInstances,
-                              mapping
-                          );
-                      },
-                      { trackedEntityInstances }
-                  )
+                        return await createTEIsPayloadMapper(
+                            await this.getMetadataRepository(instance),
+                            trackedEntityInstances,
+                            mapping
+                        );
+                    },
+                    { trackedEntityInstances }
+                )
                 : [];
 
         const { dataValues } = payload as AggregatedPackage;
@@ -175,12 +178,12 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
         const downloadItemsByAggregated =
             dataValues && dataValues.length > 0
                 ? await this.mapToDownloadItems(
-                      rule,
-                      "aggregated",
-                      instance =>
-                          Promise.resolve(new GenericPackageMapper(instance, aggregatedSync)),
-                      { dataValues }
-                  )
+                    rule,
+                    "aggregated",
+                    instance =>
+                        Promise.resolve(new GenericPackageMapper(instance, aggregatedSync)),
+                    { dataValues }
+                )
                 : [];
 
         return [...downloadItemsByEvents, ...downloadItemsByTEIS, ...downloadItemsByAggregated];
@@ -209,7 +212,7 @@ export class DownloadPayloadFromSyncRuleUseCase implements UseCase {
 //TODO: When we have a mapper for every Package type this class should be removed
 // And not use use case to map
 class GenericPackageMapper implements PayloadMapper {
-    constructor(private instance: Instance, private sync: GenericSyncUseCase) {}
+    constructor(private instance: Instance, private sync: GenericSyncUseCase) { }
 
     map(payload: SynchronizationPayload): Promise<SynchronizationPayload> {
         return this.sync.mapPayload(this.instance, payload);

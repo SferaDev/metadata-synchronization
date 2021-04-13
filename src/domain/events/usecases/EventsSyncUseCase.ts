@@ -48,14 +48,16 @@ export class EventsSyncUseCase extends GenericSyncUseCase {
 
         const stageIdsFromPrograms = programs
             ? (programs as Program[])
-                  .map(program => program.programStages.map(({ id }) => id))
-                  .flat()
+                .map(program => program.programStages.map(({ id }) => id))
+                .flat()
             : [];
 
         const progamStageIds = [...programStages.map(({ id }) => id), ...stageIdsFromPrograms];
 
+        if (!this.dataPeriodFilter) throw Error("dataPeriodFilter is required for sync events");
+
         const events = (
-            await eventsRepository.getEvents(dataParams, [...new Set(progamStageIds)])
+            await eventsRepository.getEvents(this.dataPeriodFilter, dataParams, [...new Set(progamStageIds)])
         ).map(event => {
             return dataParams.generateNewUid ? { ...event, event: generateUid() } : event;
         });
@@ -74,10 +76,10 @@ export class EventsSyncUseCase extends GenericSyncUseCase {
 
         const { dataValues: candidateDataValues = [] } = enableAggregation
             ? await aggregatedRepository.getAnalytics({
-                  dataParams,
-                  dimensionIds: [...directIndicators, ...indicatorsByProgram],
-                  includeCategories: false,
-              })
+                dataParams,
+                dimensionIds: [...directIndicators, ...indicatorsByProgram],
+                includeCategories: false,
+            })
             : {};
 
         const dataValues = _.reject(candidateDataValues, ({ dataElement }) =>

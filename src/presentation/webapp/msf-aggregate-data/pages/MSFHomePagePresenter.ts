@@ -145,10 +145,10 @@ async function validatePreviousDataValues(
 
                 return compositionRoot.events.list(
                     localInstance,
+                    { startDate: moment("1970-01-01"), endDate: startDate },
                     {
                         period: "FIXED",
                         lastUpdated: moment(lastExecutionDate).toDate(),
-                        endDate: startDate.toDate(),
                         orgUnitPaths: [orgUnit],
                         allEvents: true,
                     },
@@ -170,11 +170,9 @@ async function validatePreviousDataValues(
                 .value();
 
             if (errorEvents.length > 0) {
-                return `Sync rule '${rule.name}': we have found ${
-                    errorEvents.length
-                } related events in '${
-                    instance.name
-                }' updated after the last aggregation run that belong to periods before the start period of the sync rule:${errorEvents.join()}`;
+                return `Sync rule '${rule.name}': we have found ${errorEvents.length
+                    } related events in '${instance.name
+                    }' updated after the last aggregation run that belong to periods before the start period of the sync rule:${errorEvents.join()}`;
             }
         });
 
@@ -203,7 +201,9 @@ async function executeSyncRule(
         );
     }
 
-    const sync = compositionRoot.sync[type]({ ...builder, syncRule });
+    const sync = type === "events" ?
+        compositionRoot.sync["events"](rule.dataPeriodFilter, { ...builder, syncRule }) :
+        compositionRoot.sync[type]({ ...builder, syncRule });
 
     for await (const { message, syncReport, done } of sync.execute()) {
         if (message) addEventToProgress(message, "admin");
@@ -300,10 +300,10 @@ async function getSyncRules(
             return !overridePeriod
                 ? rule
                 : rule.updateBuilderDataParams({
-                      period: overridePeriod.period,
-                      startDate: overridePeriod.startDate,
-                      endDate: overridePeriod.endDate,
-                  });
+                    period: overridePeriod.period,
+                    startDate: overridePeriod.startDate,
+                    endDate: overridePeriod.endDate,
+                });
         })
         .map(rule => {
             const { endDate } = buildPeriodFromParams(rule.dataParams);
@@ -394,11 +394,10 @@ const getOriginName = (source: PublicInstance | Store) => {
 const getPeriodText = (period: { type: DataSyncPeriod; startDate?: Date; endDate?: Date }) => {
     const formatDate = (date?: Date) => moment(date).format("YYYY-MM-DD");
 
-    return `${availablePeriods[period.type].name} ${
-        period.type === "FIXED"
-            ? `- start: ${formatDate(period.startDate)} - end: ${formatDate(period.endDate)}`
-            : ""
-    }`;
+    return `${availablePeriods[period.type].name} ${period.type === "FIXED"
+        ? `- start: ${formatDate(period.startDate)} - end: ${formatDate(period.endDate)}`
+        : ""
+        }`;
 };
 
 async function deletePreviousDataValues(

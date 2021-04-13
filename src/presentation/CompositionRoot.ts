@@ -18,6 +18,7 @@ import { SystemInfoD2ApiRepository } from "../data/system-info/SystemInfoD2ApiRe
 import { TEID2ApiRepository } from "../data/tracked-entity-instances/TEID2ApiRepository";
 import { TransformationD2ApiRepository } from "../data/transformations/TransformationD2ApiRepository";
 import { UserD2ApiRepository } from "../data/user/UserD2ApiRepository";
+import { DataPeriodFilter } from "../domain/aggregated/entities/DataSynchronizationParams";
 import { AggregatedSyncUseCase } from "../domain/aggregated/usecases/AggregatedSyncUseCase";
 import { DeleteAggregatedUseCase } from "../domain/aggregated/usecases/DeleteAggregatedUseCase";
 import { ListAggregatedUseCase } from "../domain/aggregated/usecases/ListAggregatedUseCase";
@@ -179,12 +180,13 @@ export class CompositionRoot {
                     this.localInstance,
                     this.encryptionKey
                 ),
-            events: (builder: SynchronizationBuilder) =>
+            events: (dataPeriodFilter: DataPeriodFilter, builder: SynchronizationBuilder) =>
                 new EventsSyncUseCase(
                     builder,
                     this.repositoryFactory,
                     this.localInstance,
-                    this.encryptionKey
+                    this.encryptionKey,
+                    dataPeriodFilter
                 ),
             metadata: (builder: SynchronizationBuilder) =>
                 new MetadataSyncUseCase(
