@@ -36,7 +36,7 @@ async function main() {
                 const text = fs.readFileSync(args.config, "utf8");
                 const contents = JSON.parse(text);
                 const config = ConfigModel.unsafeDecode(contents);
-                
+
                 await start(config);
             } catch (err) {
                 getLogger("main").fatal(err);

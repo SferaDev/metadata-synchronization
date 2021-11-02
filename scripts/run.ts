@@ -29,6 +29,12 @@ const variants = [
         file: "metadata-synchronization-msf-aggregate-data",
     },
     {
+        type: "app",
+        name: "staged-rollout-app",
+        title: "MDSync Staged Rollout",
+        file: "metadata-synchronization-staged-rollout",
+    },
+    {
         type: "widget",
         name: "modules-list",
         title: "MetaData Synchronization Modules List Widget",

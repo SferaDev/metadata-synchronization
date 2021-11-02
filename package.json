@@ -33,6 +33,7 @@
         "d2": "31.10.0",
         "d2-manifest": "1.0.0",
         "file-saver": "2.0.5",
+        "fluture": "14.0.0",
         "font-awesome": "4.7.0",
         "json-stringify-deterministic": "1.0.1",
         "jszip": "3.7.1",

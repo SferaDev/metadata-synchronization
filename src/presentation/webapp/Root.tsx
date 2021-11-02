@@ -23,6 +23,7 @@ import SyncRulesCreationPage, { SyncRulesCreationParams } from "./core/pages/syn
 import { SyncRulesListPage } from "./core/pages/sync-rules-list/SyncRulesListPage";
 import { MSFHistoryPage } from "./msf-aggregate-data/pages/MSFHistoryPage";
 import { MSFHomePage } from "./msf-aggregate-data/pages/MSFHomePage";
+import { StagedRolloutHomePage } from "./staged-rollout/StagedRolloutHomePage";
 
 const Root: React.FC = () => {
     const { api, compositionRoot } = useAppContext();
@@ -106,6 +107,13 @@ const VariantRoutes: React.FC<{ variant: AppVariant }> = ({ variant }) => {
                     <Redirect to="/msf" />
                 </Switch>
             );
+        case "staged-rollout-app":
+            return (
+                <Switch>
+                    <RouteWithSession path={"/rollout"} render={() => <StagedRolloutHomePage />} />
+                    <Redirect to="/rollout" />
+                </Switch>
+            );
         default:
             return (
                 <Switch>
@@ -125,10 +133,22 @@ const getAppVariant = (): AppVariant => {
 
 const isAppVariant = (variant?: string): variant is AppVariant => {
     return (
-        !!variant && ["core-app", "data-metadata-app", "module-package-app", "msf-aggregate-data-app"].includes(variant)
+        !!variant &&
+        [
+            "core-app",
+            "data-metadata-app",
+            "module-package-app",
+            "msf-aggregate-data-app",
+            "staged-rollout-app",
+        ].includes(variant)
     );
 };
 
-export type AppVariant = "core-app" | "data-metadata-app" | "module-package-app" | "msf-aggregate-data-app";
+export type AppVariant =
+    | "core-app"
+    | "data-metadata-app"
+    | "module-package-app"
+    | "msf-aggregate-data-app"
+    | "staged-rollout-app";
 
 export default Root;
